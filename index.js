@@ -12,7 +12,7 @@ io.on('connection', function(socket){
     
     socket.on('chat message', function(msg){
         if ( name === false ){
-            name = msg;
+            name = msg.replace(/ /g, "_");
             io.emit('chat message', name + ' connected.');
         } else {
             io.emit('chat message', name + ': ' + msg);
@@ -20,7 +20,10 @@ io.on('connection', function(socket){
     });
     
     socket.on('disconnect', function() {
-        io.emit('chat message', name + ' disconnected.');
+        if (name !== false) {
+            io.emit('chat message', name + ' disconnected.');
+        }
+        console.log(name + ' disconnected.');
     });
 });
 
