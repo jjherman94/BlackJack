@@ -1,6 +1,8 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser');
 
 function getTime() {
     var d = new Date(),
@@ -10,8 +12,21 @@ function getTime() {
     return "["+h+":"+m+":"+s+"] ";
 }
 
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+//general static files
+app.use('/', express.static(__dirname + '/static'));
+
+//special static chat-file
+app.get('/', function(req,res){
+    res.sendFile(__dirname + '/index.html');
+});
+
+//something simple for posting right now
+app.use(bodyParser.urlencoded({extended: true}));
+app.post('/submit.html', function(request, response)
+{
+    console.log('Got username: ' + request.body.username);
+    console.log('Got password: ' + request.body.password);
+    response.end("submitted");
 });
 
 io.on('connection', function(socket){
