@@ -11,5 +11,5 @@
     "socket.io": "*",
     "body-parser": "*"
   },
-  "license": "CCO-1.0"
+  "license": "CC0-1.0"
 }
