@@ -4,3 +4,16 @@ The following node modules are needed:
     socket.io
     express
     body-parser
+    sqlite3
+    
+You will also need a Self-Signed Certificate to run the server.
+Here are a set of instructions on how to do this:
+(On Windows there will need to be an openssl executable in the folder,
+ as will the supplied openssl.conf file)
+   openssl genrsa -des3 -out server.key 1024
+   openssl req -config openssl.conf -new -key server.key -out server.csr
+   copy server.key server.key.org
+   openssl rsa -in server.key.org -out server.key
+   openssl x509 -req -days 9999 -in server.csr -signkey server.key -out server.crt
+
+Then copy server.crt and server.key to sslcert\

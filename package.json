@@ -9,7 +9,8 @@
   "dependencies": {
     "express": "*",
     "socket.io": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "sqlite3": "*",
   },
   "license": "CC0-1.0"
 }

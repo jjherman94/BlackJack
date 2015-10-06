@@ -1,8 +1,11 @@
 var express = require('express');
 var app = express();
+var fs = require('fs');
 var http = require('http').Server(app);
+var https = require('https');
 var io = require('socket.io')(http);
 var bodyParser = require('body-parser');
+var pem = require('pem');
 
 function getTime() {
     var d = new Date(),
@@ -78,5 +81,15 @@ io.on('connection', function(socket){
 });
 
 http.listen(3000, function(){
-    console.log('listening on *:3000');
+    console.log('http listening on *:3000');
+});
+
+//https server
+var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
+                   cert: fs.readFileSync('sslcert/server.crt', 'utf8')};
+                 
+var httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(3300, function(){
+    console.log('https listening on *:3300');
 });
