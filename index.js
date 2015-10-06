@@ -1,11 +1,21 @@
 var express = require('express');
 var app = express();
 var fs = require('fs');
-var http = require('http').Server(app);
 var https = require('https');
-var io = require('socket.io')(http);
+
+//must set up server before Socket.IO
+var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
+                   cert: fs.readFileSync('sslcert/server.crt', 'utf8'),
+                   requestCert: true};
+                 
+var httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(3300, function(){
+    console.log('https listening on *:3300');
+});
+
+var io = require('socket.io')(httpsServer);
 var bodyParser = require('body-parser');
-var pem = require('pem');
 
 function getTime() {
     var d = new Date(),
@@ -40,7 +50,7 @@ app.post('/submit.html', function(request, response)
 var people = {};
 var rooms = {};
 
-io.on('connection', function(socket){
+var socket_function = function(socket){
     socket.on("join", function(name) {
         console.log(getTime() + name + " connected.");
         people[socket.id] = {"name": name, "room": null};
@@ -78,18 +88,6 @@ io.on('connection', function(socket){
             delete people[socket.id];
         }
     });
-});
+};
 
-http.listen(3000, function(){
-    console.log('http listening on *:3000');
-});
-
-//https server
-var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
-                   cert: fs.readFileSync('sslcert/server.crt', 'utf8')};
-                 
-var httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(3300, function(){
-    console.log('https listening on *:3300');
-});
+io.on('connect', socket_function);
