@@ -11,6 +11,7 @@
     "socket.io": "*",
     "body-parser": "*",
     "sqlite3": "*",
+    "password-hash-and-salt": "*"
   },
   "license": "CC0-1.0"
 }
