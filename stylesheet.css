@@ -1,0 +1,44 @@
+#body1 {
+	background-image: url("loginImage.jpg");
+	background-size: cover;
+	margin: 0;
+	padding: 0;
+}
+
+#form1 {
+	font-family: Georgia, serif;
+	text-align: center;
+	color: white;
+}
+
+form {
+	width: 500px;
+	margin: 0 auto;
+}
+
+.div {
+	width: 500px;
+}
+
+.div .boxes {
+	min-width: 150px;
+	text-align: center;
+	display: inline-block;
+}
+
+section {
+	border-radius: 1em;
+	padding: 1em;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: 0 auto;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+}
+
+h1 {
+	font-size 2.5em;
+	color: white;
+	text-align: center;
+}
