@@ -16,4 +16,4 @@ Here are a set of instructions on how to do this:
    openssl rsa -in server.key.org -out server.key
    openssl x509 -req -days 9999 -in server.csr -signkey server.key -out server.crt
 
-Then copy server.crt and server.key to sslcert\
+Then copy server.crt and server.key to sslcert/
