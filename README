@@ -1,0 +1,6 @@
+Node.js based Blackjack server.
+
+The following node modules are needed:
+    socket.io
+    express
+    body-parser
