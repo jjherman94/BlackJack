@@ -60,9 +60,29 @@ io.on('connection', function(socket){
         }
     });
     
+    socket.on("joinRoom", function(name) {
+      var user = people[socket.id];
+      if(user) {
+        user.room = name;
+        socket.join(name);
+        io.to(user.room).emit("update", user.name + " has joined.");        
+      }
+    });
+    
+    socket.on("leaveRoom", function(name) {
+      var user = people[socket.id];
+      if(user && user.room) {
+          user.room = null;
+          socket.leave(name);
+          io.to(name).emit(user.name + "has left.");
+      }
+    });
+    
     socket.on('chat message', function(msg){
         var user = people[socket.id];
-        io.to(user.room).emit('chat message', user.name + ': ' + msg);
+        if( user && user.room ) {
+          io.to(user.room).emit('chat message', user.name + ': ' + msg);
+        }
     });
     
     socket.on('disconnect', function() {

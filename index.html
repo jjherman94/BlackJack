@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; background-color:green; }
-      #chat { height:300px; position:fixed; bottom:0; width:100%; background-color:white; }
-      #messages { overflow:hidden; list-style-type: none; margin: 0; padding: 0; height:256px; overflow-y:scroll; }
+      body { font: 13px Helvetica, Arial; background:url("./img/loginImage.jpg"); }
+      #chat { height:300px; position:fixed; bottom:0; width:100%; }
+      #messages { background-color: rgba(0,0,0, 0.5); overflow:hidden; list-style-type: none; margin: 0; padding: 0; height:256px; overflow-y:scroll; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
     </style>
@@ -22,9 +22,6 @@
                 s = (d.getSeconds()<10?'0':'') + d.getSeconds();
             return "["+h+":"+m+":"+s+"] ";
         }
-        
-        
-        
     </script>
   </head>
   <body>
@@ -45,16 +42,18 @@
     <script>
         $(document).ready(function() {
             $("#messages").height( $("#chat").height() - $("#input").height() );
-            
+            $("#m").prop("disabled", true);
+            $("#m-btn").prop("disabled", true);
         });
       var socket = io();
       $('#login').submit(function() {
         var name = $.trim( $('#name').val() );
-        $('#login').hide();
         
         if( name!==null && name!=="" ) {
             socket.emit('join', name);
-            
+            $('#login').hide();
+            $("#m").prop("disabled", false);
+            $("#m-btn").prop("disabled", false);
         }
         
         return false;
