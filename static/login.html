@@ -3,13 +3,44 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
-<body>
-	<section>
-		<form action="submit.html" method="post">
-			Username <input type="username" name="username" required>
-			Password <input type="password" name="password" required>
-			<input type="submit" value="submit">
+<body id="body1">
+	<section id="form1">
+		<h1>
+			Welcome to Blackjack! 
+			<br/>
+			<br/>
+			Please create a username and password to begin playing, or sign in below.
+		</h1>
+		<br/>
+		<br/>
+		<form action="">
+			<div class='div'>
+				<span class="boxes">
+					UserName:
+				</span>
+				<input type="username" name="username" required>
+			</div>
+			<br/>
+			<div class='div'>
+				<span class="boxes">
+					Password:
+				</span> 
+				<input type="password" name="password" required>
+			</div>
+			<br/>
+			<div class='div'>
+				<span class="boxes">
+					Confirm Password:
+				</span>
+				<input type="password" name="confirmPassword">
+			</div>
+			<br/>
+			<div class='div'>
+				<input type="submit" value="submit">
+			</div>
+			<br/>
 		</form>
 	</section>
 </body>
