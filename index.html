@@ -47,7 +47,6 @@
             $("#messages").height( $("#chat").height() - $("#input").height() );
             
         });
-      console.log(document.location.origin);
       var socket = io.connect(document.location.origin, {secure: true});
       $('#login').submit(function() {
         var name = $.trim( $('#name').val() );
