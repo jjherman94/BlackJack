@@ -25,12 +25,35 @@
     </script>
   </head>
   <body>
-    <form id="login" action="">
-        <input id="name" type="username" placeholder="Username" required>
-        <button>Login</button>
+    <!-- LOGIN FORM -->
+    <form class="form-inline" id="login" action="">
+        <input class="form-control" id="name" type="username" placeholder="Username" required>
+        <button class="btn btn-success">Login</button>
     </form>
+    
+    <!-- CREATE ROOM FORM -->
+    <form class="form-inline" id="createRoom" action="">
+        <input class="form-control" id="createName" placeholder="Room" required>
+        <button class="btn btn-primary">Create</button>
+    </form>
+    
+    <!-- JOIN ROOM FORM -->
+    <form class="form-inline" id="joinRoom" action="">
+        <input class="form-control" id="joinName" placeholder="Room" required>
+        <button class="btn btn-primary">Join</button>
+    </form>
+    
+    <!-- LIST OF ROOMS -->
+    <span class="label">ROOMS</span>
+    <button class="btn btn-success" id="getRooms">Refresh</button>
+    <div id="roomList">
+    <ul id="rooms" style="background-color:rgba(0,0,0,.5);color:beige;height:100px;width:200px;overflow-y:scroll;"></ul>
+    </div>
+    
+    <!-- CHAT BOX -->
     <div id="chat">
-        <ul id="messages"></ul>
+        <ul id="messages">
+        </ul>
         <div id="input" style="padding:0;background-color:#eee;">
             <form class="input-group" id="message" action="">
                 <input class="form-control" id="m" autocomplete="off" placeholder="Enter message" />
@@ -46,6 +69,7 @@
             $("#m-btn").prop("disabled", true);
         });
       var socket = io();
+      
       $('#login').submit(function() {
         var name = $.trim( $('#name').val() );
         
@@ -54,9 +78,27 @@
             $('#login').hide();
             $("#m").prop("disabled", false);
             $("#m-btn").prop("disabled", false);
+            
+            socket.emit("getRooms");
         }
         
         return false;
+      });
+      
+      $('#joinRoom').submit(function() {
+        socket.emit("joinRoom", $('#joinName').val());
+        $('#joinName').val('');
+        return false;
+      });
+      
+      $('#createRoom').submit(function() {
+        socket.emit("createRoom", $('#createName').val());
+        $('#createName').val('');
+        return false;
+      });
+      
+      $('#getRooms').click(function() {
+        socket.emit("getRooms");
       });
       
       $('#message').submit(function(){
@@ -68,6 +110,23 @@
         $('#m').val('');
         return false;
       });
+      
+      var roomLink = function(name) {
+        var l =$("<li><a href='#'>" + name + "</a></li>").click(function() {
+            socket.emit("joinRoom", name);
+        });
+        
+        return l;
+      };
+      
+      socket.on("roomList", function(rooms) {
+        console.log("Received roomlist");
+        $("#rooms").empty();
+        for(var room in rooms) {
+          console.log(rooms[room].name);
+          $("#rooms").append( new roomLink(rooms[room].name) );
+        }
+      }); 
       
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(getTime() + msg));

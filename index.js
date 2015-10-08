@@ -42,19 +42,23 @@ io.on('connection', function(socket){
         console.log(getTime() + name + " connected.");
         people[socket.id] = {"name": name, "room": null};
         socket.emit("update", "Hello, " + name + ". Please create or join a room.");
-        socket.emit("roomList", rooms);
     });
     
-    socket.on("refreshRooms", function() {
-        socket.emit("roomList", rooms);
+    socket.on("getRooms", function() {
+        socket.emit("roomList", rooms );
+        console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });
     
     socket.on("createRoom", function(name) {
         if( !rooms[name] ) {
             var room = new Room(name, socket.id);
+            var user = people[socket.id];
+            
             rooms[name] = room;
             socket.join(name);
-            people[socket.id].room = name
+            user.room = name;
+            socket.emit("You are now chatting in: " + user.room);
+            console.log(getTime() + user.name + " created room " + user.room);
         } else {
             socket.emit("update", "That room name is already taken.");
         }
@@ -62,10 +66,10 @@ io.on('connection', function(socket){
     
     socket.on("joinRoom", function(name) {
       var user = people[socket.id];
-      if(user) {
+      if(user && rooms[name]) {
         user.room = name;
         socket.join(name);
-        io.to(user.room).emit("update", user.name + " has joined.");        
+        io.to(user.room).emit("update", user.name + " has joined: " + user.room);        
       }
     });
     
