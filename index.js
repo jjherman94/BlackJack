@@ -86,7 +86,7 @@ var socket_function = function(socket){
             rooms[name] = room;
             socket.join(name);
             user.room = name;
-            socket.emit("You are now chatting in: " + user.room);
+            socket.emit("update", "You created: " + user.room);
             console.log(getTime() + user.name + " created room " + user.room);
         } else {
             socket.emit("update", "That room name is already taken.");
