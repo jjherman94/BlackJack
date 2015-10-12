@@ -1,7 +1,23 @@
 var express = require('express');
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var fs = require('fs');
+var https = require('https');
+var sqlite3 = require('sqlite3');
+var crypto = require('crypto');
+var password = require('password-hash-and-salt');
+
+//must set up server before Socket.IO
+var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
+                   cert: fs.readFileSync('sslcert/server.crt', 'utf8'),
+                   requestCert: true};
+                 
+var httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(3300, function(){
+    console.log('https listening on *:3300');
+});
+
+var io = require('socket.io')(httpsServer);
 var bodyParser = require('body-parser');
 
 function getTime() {
@@ -25,19 +41,32 @@ app.get('/', function(req,res){
     res.sendFile(__dirname + '/index.html');
 });
 
-//something simple for posting right now
+//something simple for posting right now (memory database only)
+var db = new sqlite3.Database(':memory:');
+
+db.run("CREATE TABLE users (username TEXT, password TEXT)");
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.post('/submit.html', function(request, response)
 {
-    console.log('Got username: ' + request.body.username);
-    console.log('Got password: ' + request.body.password);
+    password(request.body.password).hash(function(error, hash){
+    
+        var shasum = crypto.createHash('sha1');
+        shasum.update(request.body.password);
+        db.run("INSERT INTO users VALUES ('" + request.body.username 
+              + "', '" + hash + "')");
+        console.log("Current Database: ");
+        db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
+            console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
+        });
+    });
     response.end("submitted");
 });
 
 var people = {};
 var rooms = {};
 
-io.on('connection', function(socket){
+var socket_function = function(socket){
     socket.on("join", function(name) {
         console.log(getTime() + name + " connected.");
         people[socket.id] = {"name": name, "room": null};
@@ -99,8 +128,6 @@ io.on('connection', function(socket){
             delete people[socket.id];
         }
     });
-});
+};
 
-http.listen(3000, function(){
-    console.log('listening on *:3000');
-});
+io.on('connect', socket_function);
