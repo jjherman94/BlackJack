@@ -5,6 +5,7 @@ var https = require('https');
 var sqlite3 = require('sqlite3');
 var crypto = require('crypto');
 var password = require('password-hash-and-salt');
+var sanitizer = require('sanitizer');
 
 //must set up server before Socket.IO
 var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
@@ -47,20 +48,51 @@ var db = new sqlite3.Database(':memory:');
 db.run("CREATE TABLE users (username TEXT, password TEXT)");
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.post('/submit.html', function(request, response)
+app.post('/create.html', function(request, response)
 {
+    //make sure that there isn't already a user with that name
+    var clean_user = sanitizer.sanitize(request.body.username);
+    db.each('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, row){
+        response.end("User with that name already exists.");
+        return;
+    });
     password(request.body.password).hash(function(error, hash){
     
         var shasum = crypto.createHash('sha1');
         shasum.update(request.body.password);
-        db.run("INSERT INTO users VALUES ('" + request.body.username 
+        db.run("INSERT INTO users VALUES ('" + clean_user
               + "', '" + hash + "')");
-        console.log("Current Database: ");
-        db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
-            console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
-        });
+        console.log("Added user " + clean_user);
+        //console.log("Current Database: ");
+        //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
+        //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
+        //});
     });
     response.end("submitted");
+});
+
+app.post('/login.html', function(request, response)
+{
+    //first try to find the user (there will only be one result)
+    var clean_user = sanitizer.sanitize(request.body.username);
+    db.each("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, row){
+        //now test the password
+        password(request.body.password).verifyAgainst(row.password, function(error, verified){
+            if(verified){
+                console.log("User " + clean_user + " logged on");
+                response.end("okay");
+            } else {
+                console.log("Password verification failed for user " + clean_user);
+                response.end("Bad username or password.");
+            }
+        });
+    },
+    function(err, rows) {
+        if(rows == 0) {
+            console.log("User " + clean_user + " not found.");
+            response.end("Bad username or password.");
+        }
+    });
 });
 
 var people = {};
