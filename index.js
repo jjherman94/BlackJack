@@ -53,22 +53,28 @@ app.post('/create.html', function(request, response)
     //make sure that there isn't already a user with that name
     var clean_user = sanitizer.sanitize(request.body.username);
     db.each('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, row){
-        response.end("User with that name already exists.");
-        return;
-    });
-    password(request.body.password).hash(function(error, hash){
+        //nothing here
+    },
+    function(err, rows){
+        if(rows != 0) {
+            console.log("User " + clean_user + " creation attempted again.");
+            response.end("User with that name already exists.");
+        } else {
+            password(request.body.password).hash(function(error, hash){
     
-        var shasum = crypto.createHash('sha1');
-        shasum.update(request.body.password);
-        db.run("INSERT INTO users VALUES ('" + clean_user
-              + "', '" + hash + "')");
-        console.log("Added user " + clean_user);
-        //console.log("Current Database: ");
-        //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
-        //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
-        //});
+            var shasum = crypto.createHash('sha1');
+            shasum.update(request.body.password);
+            db.run("INSERT INTO users VALUES ('" + clean_user
+                    + "', '" + hash + "')");
+            console.log("Added user " + clean_user);
+            //console.log("Current Database: ");
+            //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
+            //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
+            //});
+            response.end("submitted");
+            });
+        }
     });
-    response.end("submitted");
 });
 
 app.post('/login.html', function(request, response)
