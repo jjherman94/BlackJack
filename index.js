@@ -67,10 +67,7 @@ app.get('/', function(req,res){
 //general static files
 app.use('/', express.static(__dirname + '/static'));
 
-//something simple for posting right now (memory database only)
 var db = new sqlite3.Database('users.sql3');
-
-//db.run("CREATE TABLE users (username TEXT, password TEXT)");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.post('/create.html', function(request, response)
