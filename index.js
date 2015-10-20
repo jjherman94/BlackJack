@@ -83,7 +83,7 @@ app.post('/create.html', function(request, response)
     function(err, rows){
         if(rows != 0) {
             console.log(getTime() + "User " + clean_user + " creation attempted again.");
-            response.end("User with that name already exists.");
+            response.sendFile(__dirname + '/submiterror.html');
         } else {
             password(request.body.password).hash(function(error, hash){
     
@@ -96,7 +96,7 @@ app.post('/create.html', function(request, response)
             //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
             //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
             //});
-            response.end("submitted");
+            response.sendFile(__dirname + '/submitconfirmation.html');
             });
         }
     });
