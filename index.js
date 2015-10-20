@@ -54,13 +54,20 @@ app.get('/login.html', function(req, res) {
     }
 });
 
+//List of all users in the lobby
+var usersInLobby = [];
 
 //special static chat-file
 app.get('/', function(req,res){
     if(!req.session.userName) {
         res.sendFile(__dirname + '/prompt.html');
     } else {
-        res.sendFile(__dirname + '/index.html');
+        //don't allow the user to log-in multiple times
+        if(usersInLobby.indexOf(req.session.userName) > -1) {
+            res.sendFile(__dirname + '/alreadyjoined.html');
+        } else {
+            res.sendFile(__dirname + '/index.html');
+        }
     }
 });
 
@@ -136,16 +143,10 @@ io.use(ios(mySession));
 io.on('connection', function(socket) {
     people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
     socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
-    
-    /*
-    socket.on("join", function(name) {
-        console.log(getTime() + name + " connected.");
-        people[socket.id] = {"name": name, "room": null};
-        socket.emit("update", "Hello, " + name + ". Please create or join a room.");
-    });
-    */
+    usersInLobby.push(socket.handshake.session.userName);
     
     socket.on("getRooms", function() {
+        socket.emit("update", socket.handshake.session.userName);
         socket.emit("roomList", rooms );
         console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });
@@ -193,6 +194,8 @@ io.on('connection', function(socket) {
     socket.on('disconnect', function() {
         var user = people[socket.id];
         if(user) {
+            //delete the list of users in the lobby
+            usersInLobby.splice(usersInLobby.indexOf(user.name), 1);
             if(user.room) {
                 io.to(user.room).emit('chat message', user.name + ' disconnected.');
             }
