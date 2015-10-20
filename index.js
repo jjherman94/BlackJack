@@ -116,14 +116,14 @@ app.post('/login.html', function(request, response)
                 response.redirect("/");
             } else {
                 console.log(getTime() + "Password verification failed for user " + clean_user);
-                response.end("Bad username or password.");
+                response.sendFile(__dirname + '/loginfail.html');
             }
         });
     },
     function(err, rows) {
         if(rows == 0) {
             console.log(getTime() + "User " + clean_user + " not found.");
-            response.end("Bad username or password.");
+            response.sendFile(__dirname + '/loginfail.html');
         }
     });
 });
