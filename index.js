@@ -6,6 +6,9 @@ var sqlite3 = require('sqlite3');
 var crypto = require('crypto');
 var password = require('password-hash-and-salt');
 var sanitizer = require('sanitizer');
+var session = require('express-session');
+var genuuid = require('uuid');
+var ios = require('socket.io-express-session');
 
 //must set up server before Socket.IO
 var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
@@ -13,10 +16,6 @@ var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
                    requestCert: true};
                  
 var httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(3300, function(){
-    console.log('https listening on *:3300');
-});
 
 var io = require('socket.io')(httpsServer);
 var bodyParser = require('body-parser');
@@ -29,35 +28,64 @@ function getTime() {
     return "["+h+":"+m+":"+s+"] ";
 }
 
+httpsServer.listen(3300, function(){
+    console.log(getTime() + 'https listening on *:3300');
+});
+
 var Room = function(name, owner) {
     this.name = name;
     this.owner = owner;
 };
 
-//general static files
-app.use('/', express.static(__dirname + '/static'));
+var mySession = session({secret: 'glarble marble barble',
+                         resave: false,
+                         saveUninitialized: true,
+                         cookieName: 'session'});
+
+//set up sessions
+app.use(mySession);
+
+//redirect to main page if the user is already logged in
+app.get('/login.html', function(req, res) {
+    if(!req.session.userName) {
+        res.sendFile(__dirname + '/static/login.html');
+    } else {
+        res.redirect("/");
+    }
+});
+
 
 //special static chat-file
 app.get('/', function(req,res){
-    res.sendFile(__dirname + '/index.html');
+    if(!req.session.userName) {
+        res.sendFile(__dirname + '/prompt.html');
+    } else {
+        res.sendFile(__dirname + '/index.html');
+    }
 });
 
-//something simple for posting right now (memory database only)
-var db = new sqlite3.Database(':memory:');
+//general static files
+app.use('/', express.static(__dirname + '/static'));
 
-db.run("CREATE TABLE users (username TEXT, password TEXT)");
+//something simple for posting right now (memory database only)
+var db = new sqlite3.Database('users.sql3');
+
+//db.run("CREATE TABLE users (username TEXT, password TEXT)");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.post('/create.html', function(request, response)
 {
     //make sure that there isn't already a user with that name
     var clean_user = sanitizer.sanitize(request.body.username);
+    if(clean_user === "") {
+        response.end("No empty names allowed.");
+    }
     db.each('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, row){
         //nothing here
     },
     function(err, rows){
         if(rows != 0) {
-            console.log("User " + clean_user + " creation attempted again.");
+            console.log(getTime() + "User " + clean_user + " creation attempted again.");
             response.end("User with that name already exists.");
         } else {
             password(request.body.password).hash(function(error, hash){
@@ -66,7 +94,7 @@ app.post('/create.html', function(request, response)
             shasum.update(request.body.password);
             db.run("INSERT INTO users VALUES ('" + clean_user
                     + "', '" + hash + "')");
-            console.log("Added user " + clean_user);
+            console.log(getTime() + "Added user " + clean_user);
             //console.log("Current Database: ");
             //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
             //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
@@ -85,17 +113,19 @@ app.post('/login.html', function(request, response)
         //now test the password
         password(request.body.password).verifyAgainst(row.password, function(error, verified){
             if(verified){
-                console.log("User " + clean_user + " logged on");
-                response.end("okay");
+                console.log(getTime() + "User " + clean_user + " logged on");
+                request.session.userName = clean_user;
+                request.session.uid = genuuid();
+                response.redirect("/");
             } else {
-                console.log("Password verification failed for user " + clean_user);
+                console.log(getTime() + "Password verification failed for user " + clean_user);
                 response.end("Bad username or password.");
             }
         });
     },
     function(err, rows) {
         if(rows == 0) {
-            console.log("User " + clean_user + " not found.");
+            console.log(getTime() + "User " + clean_user + " not found.");
             response.end("Bad username or password.");
         }
     });
@@ -104,12 +134,19 @@ app.post('/login.html', function(request, response)
 var people = {};
 var rooms = {};
 
-var socket_function = function(socket){
+io.use(ios(mySession));
+
+io.on('connection', function(socket) {
+    people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
+    socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
+    
+    /*
     socket.on("join", function(name) {
         console.log(getTime() + name + " connected.");
         people[socket.id] = {"name": name, "room": null};
         socket.emit("update", "Hello, " + name + ". Please create or join a room.");
     });
+    */
     
     socket.on("getRooms", function() {
         socket.emit("roomList", rooms );
@@ -166,6 +203,4 @@ var socket_function = function(socket){
             delete people[socket.id];
         }
     });
-};
-
-io.on('connect', socket_function);
+});

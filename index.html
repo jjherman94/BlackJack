@@ -26,10 +26,12 @@
   </head>
   <body>
     <!-- LOGIN FORM -->
+    <!--
     <form class="form-inline" id="login" action="">
         <input class="form-control" id="name" type="username" placeholder="Username" required>
         <button class="btn btn-success">Login</button>
     </form>
+    -->
     
     <!-- CREATE ROOM FORM -->
     <form class="form-inline" id="createRoom" action="">
@@ -65,8 +67,8 @@
     <script>
         $(document).ready(function() {
             $("#messages").height( $("#chat").height() - $("#input").height() );
-            $("#m").prop("disabled", true);
-            $("#m-btn").prop("disabled", true);
+            //$("#m").prop("disabled", true);
+            //$("#m-btn").prop("disabled", true);
         });
 
       var socket = io.connect(document.location.origin, {secure: true});

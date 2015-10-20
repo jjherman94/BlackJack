@@ -12,7 +12,11 @@
     "body-parser": "*",
     "sqlite3": "*",
     "password-hash-and-salt": "*",
-    "sanitizer": "*"
+    "sanitizer": "*",
+    "express-session": "*",
+    "uuid": "*",
+    "session.socket.io": "*",
+    "socket.io-express-session": "*"
   },
   "license": "CC0-1.0"
 }
