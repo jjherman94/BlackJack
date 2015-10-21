@@ -5,6 +5,10 @@ var https = require('https');
 var sqlite3 = require('sqlite3');
 var crypto = require('crypto');
 var password = require('password-hash-and-salt');
+var sanitizer = require('sanitizer');
+var session = require('express-session');
+var genuuid = require('uuid');
+var ios = require('socket.io-express-session');
 
 //must set up server before Socket.IO
 var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
@@ -12,10 +16,6 @@ var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
                    requestCert: true};
                  
 var httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(3300, function(){
-    console.log('https listening on *:3300');
-});
 
 var io = require('socket.io')(httpsServer);
 var bodyParser = require('body-parser');
@@ -28,52 +28,125 @@ function getTime() {
     return "["+h+":"+m+":"+s+"] ";
 }
 
+httpsServer.listen(3300, function(){
+    console.log(getTime() + 'https listening on *:3300');
+});
+
 var Room = function(name, owner) {
     this.name = name;
     this.owner = owner;
 };
 
-//general static files
-app.use('/', express.static(__dirname + '/static'));
+var mySession = session({secret: 'glarble marble barble',
+                         resave: false,
+                         saveUninitialized: true,
+                         cookieName: 'session'});
+
+//set up sessions
+app.use(mySession);
+
+//redirect to main page if the user is already logged in
+app.get('/login.html', function(req, res) {
+    if(!req.session.userName) {
+        res.sendFile(__dirname + '/static/login.html');
+    } else {
+        res.redirect("/");
+    }
+});
+
+//List of all users in the lobby
+var usersInLobby = [];
 
 //special static chat-file
 app.get('/', function(req,res){
-    res.sendFile(__dirname + '/index.html');
+    if(!req.session.userName) {
+        res.sendFile(__dirname + '/prompt.html');
+    } else {
+        //don't allow the user to log-in multiple times
+        if(usersInLobby.indexOf(req.session.userName) > -1) {
+            res.sendFile(__dirname + '/alreadyjoined.html');
+        } else {
+            res.sendFile(__dirname + '/index.html');
+        }
+    }
 });
 
-//something simple for posting right now (memory database only)
-var db = new sqlite3.Database(':memory:');
+//general static files
+app.use('/', express.static(__dirname + '/static'));
 
-db.run("CREATE TABLE users (username TEXT, password TEXT)");
+var db = new sqlite3.Database('users.sql3');
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.post('/submit.html', function(request, response)
+app.post('/create.html', function(request, response)
 {
-    password(request.body.password).hash(function(error, hash){
+    //make sure that there isn't already a user with that name
+    var clean_user = sanitizer.sanitize(request.body.username);
+    if(clean_user === "") {
+        response.end("No empty names allowed.");
+    }
+    db.each('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, row){
+        //nothing here
+    },
+    function(err, rows){
+        if(rows != 0) {
+            console.log(getTime() + "User " + clean_user + " creation attempted again.");
+            response.sendFile(__dirname + '/submiterror.html');
+        } else {
+            password(request.body.password).hash(function(error, hash){
     
-        var shasum = crypto.createHash('sha1');
-        shasum.update(request.body.password);
-        db.run("INSERT INTO users VALUES ('" + request.body.username 
-              + "', '" + hash + "')");
-        console.log("Current Database: ");
-        db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
-            console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
-        });
+            var shasum = crypto.createHash('sha1');
+            shasum.update(request.body.password);
+            db.run("INSERT INTO users VALUES ('" + clean_user
+                    + "', '" + hash + "')");
+            console.log(getTime() + "Added user " + clean_user);
+            //console.log("Current Database: ");
+            //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
+            //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
+            //});
+            response.sendFile(__dirname + '/submitconfirmation.html');
+            });
+        }
     });
-    response.end("submitted");
+});
+
+app.post('/login.html', function(request, response)
+{
+    //first try to find the user (there will only be one result)
+    var clean_user = sanitizer.sanitize(request.body.username);
+    db.each("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, row){
+        //now test the password
+        password(request.body.password).verifyAgainst(row.password, function(error, verified){
+            if(verified){
+                console.log(getTime() + "User " + clean_user + " logged on");
+                request.session.userName = clean_user;
+                request.session.uid = genuuid();
+                response.redirect("/");
+            } else {
+                console.log(getTime() + "Password verification failed for user " + clean_user);
+                response.sendFile(__dirname + '/loginfail.html');
+            }
+        });
+    },
+    function(err, rows) {
+        if(rows == 0) {
+            console.log(getTime() + "User " + clean_user + " not found.");
+            response.sendFile(__dirname + '/loginfail.html');
+        }
+    });
 });
 
 var people = {};
 var rooms = {};
 
-var socket_function = function(socket){
-    socket.on("join", function(name) {
-        console.log(getTime() + name + " connected.");
-        people[socket.id] = {"name": name, "room": null};
-        socket.emit("update", "Hello, " + name + ". Please create or join a room.");
-    });
+io.use(ios(mySession));
+
+io.on('connection', function(socket) {
+    people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
+    socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
+    usersInLobby.push(socket.handshake.session.userName);
     
     socket.on("getRooms", function() {
+        socket.emit("update", socket.handshake.session.userName);
         socket.emit("roomList", rooms );
         console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });
@@ -121,6 +194,8 @@ var socket_function = function(socket){
     socket.on('disconnect', function() {
         var user = people[socket.id];
         if(user) {
+            //delete the list of users in the lobby
+            usersInLobby.splice(usersInLobby.indexOf(user.name), 1);
             if(user.room) {
                 io.to(user.room).emit('chat message', user.name + ' disconnected.');
             }
@@ -128,6 +203,4 @@ var socket_function = function(socket){
             delete people[socket.id];
         }
     });
-};
-
-io.on('connect', socket_function);
+});

@@ -47,6 +47,8 @@ var Deck = function()
   this.cards.push( new Card( this.cards.SuitsEnum.Heart, "Jack", 10 ) );
   this.cards.push( new Card( this.cards.SuitsEnum.Heart, "Queen", 10 ) );
   this.cards.push( new Card( this.cards.SuitsEnum.Heart, "King", 10 ) );
+  
+  this.shuffleDeck();
 };
 
 Deck.prototype.shuffleDeck = function()

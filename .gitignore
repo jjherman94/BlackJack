@@ -1,2 +1,4 @@
 node_modules/
+openssl/
 sslcert/
+users.sql3
