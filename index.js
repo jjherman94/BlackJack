@@ -146,7 +146,7 @@ io.on('connection', function(socket) {
     usersInLobby.push(socket.handshake.session.userName);
     
     socket.on("getRooms", function() {
-        socket.emit("update", socket.handshake.session.userName);
+        //socket.emit("update", socket.handshake.session.userName);
         socket.emit("roomList", rooms );
         console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });

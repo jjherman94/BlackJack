@@ -6,140 +6,54 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    
+    <link rel="stylesheet" href="../css/simple-sidebar.css">
+    <script src="../js/connect.js"></script>
+    
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; background:url("./img/loginImage.jpg"); }
-      #chat { height:300px; position:fixed; bottom:0; width:100%; }
-      #messages { background-color: rgba(0,0,0, 0.5); overflow:hidden; list-style-type: none; margin: 0; padding: 0; height:256px; overflow-y:scroll; }
+      #messages { background-color: rgba(0,0,0, 0.5); overflow:hidden; list-style-type: none; margin: 0; padding: 0; height:100%; overflow-y:scroll; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
     </style>
-    <script type="text/javascript">
-        function getTime() {
-            var d = new Date(),
-                h = (d.getHours()<10?'0':'') + d.getHours(),
-                m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
-                s = (d.getSeconds()<10?'0':'') + d.getSeconds();
-            return "["+h+":"+m+":"+s+"] ";
-        }
-    </script>
   </head>
   <body>
-    <!-- LOGIN FORM -->
-    <!--
-    <form class="form-inline" id="login" action="">
-        <input class="form-control" id="name" type="username" placeholder="Username" required>
-        <button class="btn btn-success">Login</button>
-    </form>
-    -->
+  
     
-    <!-- CREATE ROOM FORM -->
-    <form class="form-inline" id="createRoom" action="">
-        <input class="form-control" id="createName" placeholder="Room" required>
-        <button class="btn btn-primary">Create</button>
-    </form>
-    
-    <!-- JOIN ROOM FORM -->
-    <form class="form-inline" id="joinRoom" action="">
-        <input class="form-control" id="joinName" placeholder="Room" required>
-        <button class="btn btn-primary">Join</button>
-    </form>
-    
-    <!-- LIST OF ROOMS -->
-    <span class="label">ROOMS</span>
-    <button class="btn btn-success" id="getRooms">Refresh</button>
-    <div id="roomList">
-    <ul id="rooms" style="background-color:rgba(0,0,0,.5);color:beige;height:100px;width:200px;overflow-y:scroll;"></ul>
-    </div>
-    
-    <!-- CHAT BOX -->
-    <div id="chat">
+  <div id="wrapper">
+    <div id="sidebar-wrapper">
         <ul id="messages">
         </ul>
         <div id="input" style="padding:0;background-color:#eee;">
-            <form class="input-group" id="message" action="">
+            <form class="input-group" id="message">
                 <input class="form-control" id="m" autocomplete="off" placeholder="Enter message" />
                 <span class="input-group-btn"><button id="m-btn" class="btn btn-primary">Send</button></span>
             </form>
         </div>
-    </div>
+    </div> <!-- Sidebar -->
     
-    <script>
-        $(document).ready(function() {
-            $("#messages").height( $("#chat").height() - $("#input").height() );
-            //$("#m").prop("disabled", true);
-            //$("#m-btn").prop("disabled", true);
-        });
-
-      var socket = io.connect(document.location.origin, {secure: true});
-
-      $('#login').submit(function() {
-        var name = $.trim( $('#name').val() );
+    <div id="page-content-wrapper">
+        <!-- CREATE ROOM FORM -->
+        <form class="form-inline" id="createRoom">
+            <input class="form-control" id="createName" placeholder="Room" required>
+            <button class="btn btn-primary">Create</button>
+        </form>
         
-        if( name!==null && name!=="" ) {
-            socket.emit('join', name);
-            $('#login').hide();
-            $("#m").prop("disabled", false);
-            $("#m-btn").prop("disabled", false);
-            
-            socket.emit("getRooms");
-        }
+        <!-- JOIN ROOM FORM -->
+        <form class="form-inline" id="joinRoom">
+            <input class="form-control" id="joinName" placeholder="Room" required>
+            <button class="btn btn-primary">Join</button>
+        </form>
         
-        return false;
-      });
-      
-      $('#joinRoom').submit(function() {
-        socket.emit("joinRoom", $('#joinName').val());
-        $('#joinName').val('');
-        return false;
-      });
-      
-      $('#createRoom').submit(function() {
-        socket.emit("createRoom", $('#createName').val());
-        $('#createName').val('');
-        return false;
-      });
-      
-      $('#getRooms').click(function() {
-        socket.emit("getRooms");
-      });
-      
-      $('#message').submit(function(){
-        var msg = $.trim( $('#m').val() );
-        
-        if( msg!==null && msg!=="" ) {
-            socket.emit('chat message', msg);
-        }
-        $('#m').val('');
-        return false;
-      });
-      
-      var roomLink = function(name) {
-        var l =$("<li><a href='#'>" + name + "</a></li>").click(function() {
-            socket.emit("joinRoom", name);
-        });
-        
-        return l;
-      };
-      
-      socket.on("roomList", function(rooms) {
-        console.log("Received roomlist");
-        $("#rooms").empty();
-        for(var room in rooms) {
-          console.log(rooms[room].name);
-          $("#rooms").append( new roomLink(rooms[room].name) );
-        }
-      }); 
-      
-      socket.on('chat message', function(msg){
-        $('#messages').append($('<li>').text(getTime() + msg));
-        $('#messages').scrollTop( $("#messages")[0].scrollHeight );
-      });
-      
-      socket.on('update', function(msg) {
-        $('#messages').append($('<li style=\"color:#39F;\">').text(getTime() + msg));
-        $('#messages').scrollTop( $("#messages")[0].scrollHeight );
-      });
-    </script>
+        <!-- LIST OF ROOMS -->
+        <span class="label">ROOMS</span>
+        <button class="btn btn-success" id="getRooms">Refresh</button>
+        <div id="roomList">
+        <ul id="rooms" style="background-color:rgba(0,0,0,.5);color:beige;height:100px;width:200px;overflow-y:scroll;"></ul>
+        </div>
+    </div> <!-- Container -->
+    
+  </div> <!-- Wrapper --> 
   </body>
 </html>
