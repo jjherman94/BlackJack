@@ -3,37 +3,89 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+  <link href='http://fonts.googleapis.com/css?family=Varela+Round|Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/simple-sidebar.css">
+  <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+ 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="../js/connect.js"></script>
+
 </head>
-<body id="body1">
-	<section id="form1">
-		<h1>
-			Welcome to Blackjack! 
-			<br/>
-			<br/>
-			Login yo
-		</h1>
-		<br/>
-		<br/>
-		<form action="" method="post">
-			<div class='div'>
-				<span class="boxes">
-					UserName:
-				</span>
-				<input type="username" name="username" required>
-			</div>
-			<br/>
-			<div class='div'>
-				<span class="boxes">
-					Password:
-				</span> 
-				<input type="password" name="password" required>
-			</div>
-			<br/>
-			<div class='div'>
-				<input type="submit" value="submit">
-			</div>
-		</form>
-	</section>
+<body>
+	<!--login modal-->
+  <div id="loginModal" class="modal show" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h1 class="text-center">Login, yo</h1>
+          </div>
+          <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label for="inputUsername"  class="col-sm-2 control-label">Username</label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="username" placeholder="Professional" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+                  <div class="col-sm-10">
+                    <input type="password" class="form-control" id="password" placeholder="Iam733t" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default" data-dismiss="modal">Log in</button>
+                  </div>
+                </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <div class="col-md-12">
+              Not a member?
+              <button class="btn btn-default">Register</button>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wrapper">
+    <div id="sidebar-wrapper">
+        <ul id="messages">
+        </ul>
+        <div id="input" style="padding:0;background-color:#eee;">
+            <form class="input-group" id="message">
+                <input class="form-control" id="m" autocomplete="off" placeholder="Enter message" />
+                <span class="input-group-btn"><button id="m-btn" class="btn btn-primary">Send</button></span>
+            </form>
+        </div>
+    </div> <!-- Sidebar -->
+    
+    <div id="page-content-wrapper">
+        <!-- CREATE ROOM FORM -->
+        <form class="form-inline" id="createRoom">
+            <input class="form-control" id="createName" placeholder="Room" required>
+            <button class="btn btn-primary">Create</button>
+        </form>
+        
+        <!-- JOIN ROOM FORM -->
+        <form class="form-inline" id="joinRoom">
+            <input class="form-control" id="joinName" placeholder="Room" required>
+            <button class="btn btn-primary">Join</button>
+        </form>
+        
+        <!-- LIST OF ROOMS -->
+        <span class="label">ROOMS</span>
+        <button class="btn btn-success" id="getRooms">Refresh</button>
+        <div id="roomList">
+        <ul id="rooms" style="background-color:rgba(0,0,0,.5);color:beige;height:100px;width:200px;overflow-y:scroll;"></ul>
+        </div>
+    </div> <!-- Container -->
+    
+  </div> <!-- Wrapper -->
 </body>
 </html>

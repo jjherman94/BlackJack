@@ -1,44 +1,28 @@
-#body1 {
-	background-image: url("loginImage.jpg");
-	background-size: cover;
-	margin: 0;
-	padding: 0;
+* { 
+	margin: 0; 
+	padding: 0; 
+	box-sizing: border-box; 
+}
+      
+body { 
+	font: 13px Helvetica, Arial; 
+	background:url("./img/loginImage.jpg"); 
+}
+ 
+#messages { 
+	background-color: rgba(0,0,0, 0.5); 
+	overflow:hidden; 
+	list-style-type: none; 
+	margin: 0; 
+	adding: 0; 
+	height:100%; 
+	overflow-y:scroll;
 }
 
-#form1 {
-	font-family: Georgia, serif;
-	text-align: center;
-	color: white;
+#messages li { 
+	padding: 5px 10px; 
 }
 
-form {
-	width: 500px;
-	margin: 0 auto;
-}
-
-.div {
-	width: 500px;
-}
-
-.div .boxes {
-	min-width: 150px;
-	text-align: center;
-	display: inline-block;
-}
-
-section {
-	border-radius: 1em;
-	padding: 1em;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin: 0 auto;
-	margin-right: -50%;
-	transform: translate(-50%, -50%);
-}
-
-h1 { 
-	font-size: 2.5em;
-	color: white;
-	text-align: center;
+#messages li:nth-child(odd) { 
+	background: #eee; 
 }
