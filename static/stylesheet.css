@@ -26,3 +26,35 @@ body {
 #messages li:nth-child(odd) { 
 	background: #eee; 
 }
+
+.modal-body {
+	margin: 0;
+	background-color: #5A6673;
+	opacity: .8;
+	border-color: #5A6673;
+	color: black;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.modal-header {
+	margin: 0;
+	background-color: #1E90FF;
+	color: black;
+	opacity: .7;
+	padding-bottom: 0;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.modal-footer {
+	margin: 0;
+	opacity: .7;
+	color: black;
+	padding-top: 0;
+	background-color: #1E90FF;
+}
+
+button.btn {
+	background: #008B8B;
+	opacity: .8;
+}
