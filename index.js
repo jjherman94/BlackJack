@@ -213,7 +213,11 @@ io.on('connection', function(socket) {
 var http = require('http');
 var httpApp = express();
 httpApp.get('*', function(req, res) {
-    var new_host = req.headers['host'].substring(0, req.headers['host'].indexOf(':'));
+    var split_loc = req.headers['host'].indexOf(':');
+    var new_host = req.headers['host'].substring(0, split_loc);
+    if(split_loc == -1) {
+        new_host = req.headers['host'];
+    }
     res.redirect('https://' + new_host + ':' + HTTPS_PORT + req.url );
 });
 var httpServer = http.createServer(httpApp);
