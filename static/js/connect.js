@@ -70,4 +70,31 @@ socket.on('update', function(msg) {
     $('#messages').scrollTop( $("#messages")[0].scrollHeight );
 });
 
+socket.on('loginGood', function() {
+    //tried to do this with the following code:
+    //  $('#loginModal').hide();
+    //  $('.modal-backdrop').hide();
+    //and
+    //  $('#loginModal').modal('hide');
+    //but neither was working, so I did this, which works.
+    document.getElementById('loginModal').style.visibility = 'hidden';
+});
+
+socket.on('loginBad', function() {
+    //TODO: Make function make an error appear
+    console.log("bad login");
+});
+
+function send_login_() {
+    //Get attributes from login form
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    //Send it over to the server
+    socket.emit("login", {"username":username, "password":password});
+}
+
+
+//make a global version of send_login (by excluding var)
+send_login = send_login_;
+
 });

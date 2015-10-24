@@ -42,7 +42,7 @@ var Room = function(name, owner) {
 };
 
 var mySession = session({secret: 'glarble marble barble',
-                         resave: false,
+                         resave: true,
                          saveUninitialized: true,
                          cookieName: 'session'});
 
@@ -142,12 +142,20 @@ app.post('/login.html', function(request, response)
 var people = {};
 var rooms = {};
 
-io.use(ios(mySession));
+io.use(ios(mySession, {autoSave:true}));
 
 io.on('connection', function(socket) {
-    people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
-    socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
-    usersInLobby.push(socket.handshake.session.userName);
+    function add_user() {
+        people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
+        socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
+        usersInLobby.push(socket.handshake.session.userName);
+    }
+    //if already signed in, send a login success
+    console.log(socket.handshake.session.userName);
+    if(socket.handshake.session.userName) {
+        socket.emit("loginGood");
+        add_user();
+    }
     
     socket.on("getRooms", function() {
         //socket.emit("update", socket.handshake.session.userName);
@@ -206,6 +214,36 @@ io.on('connection', function(socket) {
             console.log(getTime() + user.name + ' disconnected.');
             delete people[socket.id];
         }
+    });
+    
+    socket.on('login', function(data) {
+        //don't allow people to login multiple times
+        if(socket.handshake.session.userName) {
+            socket.emit("loginBad");
+        }
+        //first try to find the user (there will only be one result)
+        var clean_user = sanitizer.sanitize(data.username);
+        db.all("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, rows){
+            if(rows) {
+                row = rows[0];
+                //now test the password
+                password(data.password).verifyAgainst(row.password, function(error, verified){
+                    if(verified){
+                        console.log(getTime() + "User " + clean_user + " logged on");
+                        socket.handshake.session.userName = clean_user;
+                        socket.handshake.session.uid = genuuid();
+                        add_user();
+                        socket.emit("loginGood");
+                    } else {
+                        console.log(getTime() + "Password verification failed for user " + clean_user);
+                        socket.emit("loginBad");
+                    }
+                });
+            } else {
+                console.log(getTime() + "User " + clean_user + " not found.");
+                socket.emit("loginBad");
+            }
+        });
     });
 });
 
