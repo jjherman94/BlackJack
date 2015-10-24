@@ -10,6 +10,9 @@ var session = require('express-session');
 var genuuid = require('uuid');
 var ios = require('socket.io-express-session');
 
+var HTTPS_PORT = 3300;
+var HTTP_PORT = 3000;
+
 //must set up server before Socket.IO
 var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
                    cert: fs.readFileSync('sslcert/server.crt', 'utf8'),
@@ -28,8 +31,9 @@ function getTime() {
     return "["+h+":"+m+":"+s+"] ";
 }
 
-httpsServer.listen(3300, function(){
-    console.log(getTime() + 'https listening on *:3300');
+httpsServer.listen(HTTPS_PORT, function(){
+    console.log(getTime() + 'https listening on port ' + HTTPS_PORT);
+    console.log(getTime() + 'http listening on port ' + HTTP_PORT);
 });
 
 var Room = function(name, owner) {
@@ -204,3 +208,13 @@ io.on('connection', function(socket) {
         }
     });
 });
+
+//Redirect any http requests to https
+var http = require('http');
+var httpApp = express();
+httpApp.get('*', function(req, res) {
+    var new_host = req.headers['host'].substring(0, req.headers['host'].indexOf(':'));
+    res.redirect('https://' + new_host + ':' + HTTPS_PORT + req.url );
+});
+var httpServer = http.createServer(httpApp);
+httpServer.listen(HTTP_PORT);
