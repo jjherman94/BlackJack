@@ -151,7 +151,6 @@ io.on('connection', function(socket) {
         usersInLobby.push(socket.handshake.session.userName);
     }
     //if already signed in, send a login success
-    console.log(socket.handshake.session.userName);
     if(socket.handshake.session.userName) {
         socket.emit("loginGood");
         add_user();
@@ -224,7 +223,7 @@ io.on('connection', function(socket) {
         //first try to find the user (there will only be one result)
         var clean_user = sanitizer.sanitize(data.username);
         db.all("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, rows){
-            if(rows) {
+            if(rows.length > 0) {
                 row = rows[0];
                 //now test the password
                 password(data.password).verifyAgainst(row.password, function(error, verified){
