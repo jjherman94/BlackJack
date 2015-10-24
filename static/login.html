@@ -24,17 +24,25 @@
           </div>
           <!-- I made this ugly but functional - Adam -->
           <div class="modal-body">
-              <label for="inputUsername"  class="col-sm-2 control-label">Username</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" id="username" placeholder="Professional" required>
+            <form class="form-horizontal">
+              <div class="form-group">
+                <label for="inputUsername"  class="col-sm-2 control-label">Username</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="username" placeholder="Professional" required>
+                </div>
               </div>
-              <label for="inputPassword" class="col-sm-2 control-label">Password</label>
-              <div class="col-sm-10">
-                <input type="password" class="form-control" id="password" placeholder="Iam733t" required>
+              <div class="form-group">
+                <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+                <div class="col-sm-10">
+                  <input type="password" class="form-control" id="password" placeholder="Iam733t" required>
+                </div>
               </div>
-              <div class="col-sm-offset-2 col-sm-10">
-                <button onclick="window.send_login()" class="btn btn-default">Log in</button>
+              <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button onclick="window.send_login()" class="btn btn-default">Log in</button>
+                </div>
               </div>
+            </form>
           </div>
           <div class="modal-footer">
             <div class="col-md-12">
