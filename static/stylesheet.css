@@ -54,7 +54,47 @@ body {
 	background-color: #1E90FF;
 }
 
-button.btn {
+#loginModal button.btn {
 	background: #008B8B;
+	opacity: .9;
+	color: black;
+	font-weight: bold;
+	border: solid;
+	border-color: black;
+	text-transform: uppercase;
+
+}
+
+.tab-content {
+	padding: 5px;
+	background-color:  #5A6673;
+}
+
+.nav-tabs > li > a {
+	border: medium none;
+	color: white;
+	background: #161616;
+	text-transform: uppercase;
+}
+
+.nav-tabs > li > a:hover {
+	background-color: #5A6673 !important;
+	border: medium-none;
+	border-radius: 0;
+	color: white;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+	background-color: #5A6673;
 	opacity: .8;
+	color: black;
+	font-weight: bold;
+	outline: none;
+	text-transform: uppercase;
+	border: 1px solid #ddd;
+	border-bottom-color: transparent;
 }
