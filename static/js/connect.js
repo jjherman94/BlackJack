@@ -85,6 +85,11 @@ socket.on('loginBad', function() {
     console.log("bad login");
 });
 
+socket.on('createBad', function(data) {
+    //ToDO: Make function make an error appear
+    console.log("Bad create: " + data.reason());
+});
+
 function send_login_() {
     //Get attributes from login form
     var username = document.getElementById('username').value;
@@ -93,8 +98,20 @@ function send_login_() {
     socket.emit("login", {"username":username, "password":password});
 }
 
+function send_create_() {
+    //Get attributes from login form
+    var username = document.getElementById('create_username').value;
+    var password = document.getElementById('create_password').value;
+    var password2 = document.getElementById('create_password2').value;
+    if(password !== password2) {
+       //TODO: Make a failure message about passwords not matching
+       return;
+    }
+    socket.emit("create", {"username":username, "password":password});
+}
 
-//make a global version of send_login (by excluding var)
+//make a global version of send_login and send_create (by excluding var)
 send_login = send_login_;
+send_create = send_create_;
 
 });

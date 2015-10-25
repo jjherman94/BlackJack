@@ -21,7 +21,6 @@ var credentials = {key: fs.readFileSync('sslcert/server.key', 'utf8'),
 var httpsServer = https.createServer(credentials, app);
 
 var io = require('socket.io')(httpsServer);
-var bodyParser = require('body-parser');
 
 function getTime() {
     var d = new Date(),
@@ -49,29 +48,16 @@ var mySession = session({secret: 'glarble marble barble',
 //set up sessions
 app.use(mySession);
 
-//redirect to main page if the user is already logged in
-app.get('/login.html', function(req, res) {
-    if(!req.session.userName) {
-        res.sendFile(__dirname + '/static/login.html');
-    } else {
-        res.redirect("/");
-    }
-});
-
 //List of all users in the lobby
 var usersInLobby = [];
 
 //special static chat-file
 app.get('/', function(req,res){
-    if(!req.session.userName) {
-        res.sendFile(__dirname + '/prompt.html');
+    //don't allow the user to log-in multiple times
+    if(usersInLobby.indexOf(req.session.userName) > -1) {
+        res.sendFile(__dirname + '/alreadyjoined.html');
     } else {
-        //don't allow the user to log-in multiple times
-        if(usersInLobby.indexOf(req.session.userName) > -1) {
-            res.sendFile(__dirname + '/alreadyjoined.html');
-        } else {
-            res.sendFile(__dirname + '/index.html');
-        }
+        res.sendFile(__dirname + '/index.html');
     }
 });
 
@@ -79,65 +65,6 @@ app.get('/', function(req,res){
 app.use('/', express.static(__dirname + '/static'));
 
 var db = new sqlite3.Database('users.sql3');
-
-app.use(bodyParser.urlencoded({extended: true}));
-app.post('/create.html', function(request, response)
-{
-    //make sure that there isn't already a user with that name
-    var clean_user = sanitizer.sanitize(request.body.username);
-    if(clean_user === "") {
-        response.end("No empty names allowed.");
-    }
-    db.each('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, row){
-        //nothing here
-    },
-    function(err, rows){
-        if(rows != 0) {
-            console.log(getTime() + "User " + clean_user + " creation attempted again.");
-            response.sendFile(__dirname + '/submiterror.html');
-        } else {
-            password(request.body.password).hash(function(error, hash){
-    
-            var shasum = crypto.createHash('sha1');
-            shasum.update(request.body.password);
-            db.run("INSERT INTO users VALUES ('" + clean_user
-                    + "', '" + hash + "')");
-            console.log(getTime() + "Added user " + clean_user);
-            //console.log("Current Database: ");
-            //db.each("SELECT rowid AS id, username, password FROM users", function(err, row){
-            //    console.log(row.id + ": Username=" + row.username + "; Password=" + row.password);
-            //});
-            response.sendFile(__dirname + '/submitconfirmation.html');
-            });
-        }
-    });
-});
-
-app.post('/login.html', function(request, response)
-{
-    //first try to find the user (there will only be one result)
-    var clean_user = sanitizer.sanitize(request.body.username);
-    db.each("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, row){
-        //now test the password
-        password(request.body.password).verifyAgainst(row.password, function(error, verified){
-            if(verified){
-                console.log(getTime() + "User " + clean_user + " logged on");
-                request.session.userName = clean_user;
-                request.session.uid = genuuid();
-                response.redirect("/");
-            } else {
-                console.log(getTime() + "Password verification failed for user " + clean_user);
-                response.sendFile(__dirname + '/loginfail.html');
-            }
-        });
-    },
-    function(err, rows) {
-        if(rows == 0) {
-            console.log(getTime() + "User " + clean_user + " not found.");
-            response.sendFile(__dirname + '/loginfail.html');
-        }
-    });
-});
 
 var people = {};
 var rooms = {};
@@ -241,6 +168,30 @@ io.on('connection', function(socket) {
             } else {
                 console.log(getTime() + "User " + clean_user + " not found.");
                 socket.emit("loginBad");
+            }
+        });
+    });
+    
+    socket.on('create', function(data) {
+        //make sure the creation is okay
+        var clean_user = sanitizer.sanitize(data.username);
+        if(clean_user == "") {
+            socket.emit("createBad", {'reason': 'Empty user names are not allowed.'});
+        }
+        db.all('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, rows) {
+            if(rows.length > 0) {
+                console.log(getTime() + "User " + clean_user + " creation attempted again.");
+                socket.emit("createBad", {'reason': 'Username already taken.'});
+            } else {
+                password(data.password).hash(function(error, hash){
+                    var shasum = crypto.createHash('sha1');
+                    shasum.update(data.password);
+                    db.run("INSERT INTO users VALUES ('" + clean_user
+                            + "', '" + hash + "')");
+                    console.log(getTime() + "Added user " + clean_user);
+                    add_user();
+                    socket.emit("loginGood");
+                });
             }
         });
     });
