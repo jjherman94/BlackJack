@@ -54,11 +54,15 @@ var usersInLobby = [];
 //special static chat-file
 app.get('/', function(req,res){
     //don't allow the user to log-in multiple times
+    /*
+    TODO: Make this not buggy
     if(usersInLobby.indexOf(req.session.userName) > -1) {
         res.sendFile(__dirname + '/alreadyjoined.html');
     } else {
         res.sendFile(__dirname + '/index.html');
     }
+    */
+    res.sendFile(__dirname + '/index.html');
 });
 
 //general static files
@@ -189,6 +193,8 @@ io.on('connection', function(socket) {
                     db.run("INSERT INTO users VALUES ('" + clean_user
                             + "', '" + hash + "')");
                     console.log(getTime() + "Added user " + clean_user);
+                    socket.handshake.session.userName = clean_user;
+                    socket.handshake.session.uid = genuuid();
                     add_user();
                     socket.emit("loginGood");
                 });
