@@ -19,6 +19,14 @@ body {
 	overflow-y:scroll;
 }
 
+#blackjackBoard {
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	width: 400px;
+	height: 400px;
+}
+
 #messages li { 
 	padding: 5px 10px; 
 }
