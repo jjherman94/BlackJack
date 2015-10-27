@@ -1,4 +1,5 @@
 node_modules/
 openssl/
-sslcert/
+sslcert/server.crt
+sslcert/server.key
 users.sql3
