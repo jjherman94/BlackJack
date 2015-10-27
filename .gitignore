@@ -3,3 +3,8 @@ openssl/
 sslcert/server.crt
 sslcert/server.key
 users.sql3
+nbproject/
+server.crt
+server.csr
+server.key
+server.key.org
