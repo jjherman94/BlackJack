@@ -82,6 +82,7 @@ io.on('connection', function(socket) {
     function add_user() {
         people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
         socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
+        socket.emit("roomList", rooms );
         usersInLobby.push(socket.handshake.session.userName);
     }
     //if already signed in, send a login success
@@ -100,10 +101,12 @@ io.on('connection', function(socket) {
     function leaveRoom(room, user) {
         user.room = null;
         socket.leave(room.name);
+        socket.emit("update", "You left: "+room.name);
         room.people_in--;
         //destroy the room if empty
         if(room.people_in === 0) {
             delete rooms[room.name];
+            socket.emit("roomList", rooms );
         }
     }
     
@@ -126,6 +129,7 @@ io.on('connection', function(socket) {
             //now re-assign the room
             user.room = room;
             socket.join(room.name);
+            socket.emit("roomList", rooms );
         } else {
             socket.emit("update", "That room name is already taken.");
         }
@@ -138,6 +142,7 @@ io.on('connection', function(socket) {
           if(user.room) {
               //ignore requests to join rooms that they are already in
               if(user.room.name === name) {
+                  socket.emit("update", "You are already in that room.");
                   return;
               }
               leaveRoom(user.room, user);

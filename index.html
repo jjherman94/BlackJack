@@ -100,22 +100,15 @@
     
     <div id="page-content-wrapper">
         <!-- CREATE ROOM FORM -->
-        <form class="form-inline" id="createRoom">
-            <input class="form-control" id="createName" placeholder="Room" required>
+        <form class="form-inline" id="createRoom" >
+            <input class="form-control" id="createName" placeholder="Room">
             <button class="btn btn-primary">Create</button>
         </form>
         
-        <!-- JOIN ROOM FORM -->
-        <form class="form-inline" id="joinRoom">
-            <input class="form-control" id="joinName" placeholder="Room" required>
-            <button class="btn btn-primary">Join</button>
-        </form>
-        
-        <!-- LIST OF ROOMS -->
-        <span class="label">ROOMS</span>
         <button class="btn btn-success" id="getRooms">Refresh</button>
+        <!-- LIST OF ROOMS -->
         <div id="roomList">
-        <ul id="rooms" style="background-color:rgba(0,0,0,.5);color:beige;height:100px;width:200px;overflow-y:scroll;"></ul>
+        <ul id="rooms"></ul>
         </div>
     </div> <!-- Container -->
     

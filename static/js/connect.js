@@ -66,7 +66,7 @@ socket.on('chat message', function(msg){
 });
 
 socket.on('update', function(msg) {
-    $('#messages').append($('<li style=\"color:#39F;\">').text(getTime() + msg));
+    $('#messages').append($('<li style=\"color:#ddd;background-color:rgba(0,0,0,.5);\">').text(getTime() + msg));
     $('#messages').scrollTop( $("#messages")[0].scrollHeight );
 });
 
