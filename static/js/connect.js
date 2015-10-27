@@ -55,8 +55,8 @@ socket.on("roomList", function(rooms) {
     console.log("Received roomlist");
     $("#rooms").empty();
     for(var room in rooms) {
-      console.log(rooms[room].name);
-      $("#rooms").append( new roomLink(rooms[room].name) );
+      console.log(rooms[room]);
+      $("#rooms").append( new roomLink(rooms[room]) );
     }
 }); 
 
@@ -66,7 +66,7 @@ socket.on('chat message', function(msg){
 });
 
 socket.on('update', function(msg) {
-    $('#messages').append($('<li style=\"color:#39F;\">').text(getTime() + msg));
+    $('#messages').append($('<li style=\"color:#ddd;background-color:rgba(0,0,0,.5);\">').text(getTime() + msg));
     $('#messages').scrollTop( $("#messages")[0].scrollHeight );
 });
 

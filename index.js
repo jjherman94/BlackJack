@@ -83,6 +83,7 @@ io.on('connection', function(socket) {
         var toAdd = blackJack.createPlayer(socket.handshake.session.userName,
                                            socket.handshake.session.chips);
         people[socket.id] = toAdd;
+        socket.emit("roomList", rooms );
         socket.emit("update", "Yoooo, " + socket.handshake.session.userName + ". Please create or join a room.");
         usersInLobby.push(socket.handshake.session.userName);
     }
@@ -94,7 +95,12 @@ io.on('connection', function(socket) {
     
     socket.on("getRooms", function() {
         //socket.emit("update", socket.handshake.session.userName);
-        socket.emit("roomList", rooms );
+        var tempRooms = Array();
+        //extract out the names to fix a crash
+        for(var key in rooms){
+          tempRooms.push(rooms[key].name);
+        }
+        socket.emit("roomList", tempRooms );
         console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });
     
@@ -104,6 +110,7 @@ io.on('connection', function(socket) {
         socket.leave(room.name);
         //need to tell the game that the player left
         room.game.removePlayer(user);
+        socket.emit("update", "You left: "+room.name);
         room.people_in--;
         //destroy the room if empty
         if(room.people_in === 0) {
@@ -118,8 +125,6 @@ io.on('connection', function(socket) {
             
             rooms[name] = room;
             socket.join(name);
-            socket.emit("update", "You created and joined: " + name);
-            console.log(getTime() + user.name + " created: " + name);
             //leave old room if needed
             var oldRoom = user.room;
             //make sure the user doesn't recieve the leaving message
@@ -129,6 +134,8 @@ io.on('connection', function(socket) {
             }
             //now re-assign the room
             user.room = room;
+            socket.emit("update", "You created and joined: " + name);
+            console.log(getTime() + user.name + " created: " + name);
             socket.join(room.name);
             //make the user join the game now
             room.game.addPlayer(user);
@@ -144,6 +151,7 @@ io.on('connection', function(socket) {
           if(user.room) {
               //ignore requests to join rooms that they are already in
               if(user.room.name === name) {
+                  socket.emit("update", "You are already in that room.");
                   return;
               }
               leaveRoom(user.room, user);
