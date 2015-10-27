@@ -56,7 +56,7 @@ socket.on("roomList", function(rooms) {
     $("#rooms").empty();
     for(var room in rooms) {
       console.log(rooms[room]);
-      $("#rooms").append( new roomLink(rooms[room]) );
+      $("#rooms").append( new roomLink(rooms[room].name) );
     }
 }); 
 
