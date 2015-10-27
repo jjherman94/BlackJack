@@ -19,7 +19,7 @@ exports.Player.prototype.betChips = function( chipsBet )
 
 exports.Player.prototype.stand = function()
 {
-
+  this.game.nextPlayer();
 };
 
 exports.Player.prototype.hit = function()
@@ -33,16 +33,16 @@ exports.Player.prototype.split = function()
 };
 
 /*
-Player.prototype.login = function()
-{
+ Player.prototype.login = function()
+ {
 
-};
+ };
 
-Player.prototype.logout = function()
-{
+ Player.prototype.logout = function()
+ {
 
-};
-*/
+ };
+ */
 
 exports.Player.prototype.getHandValue = function()
 {
