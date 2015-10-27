@@ -81,7 +81,7 @@ io.use(ios(mySession, {autoSave:true}));
 io.on('connection', function(socket) {
     function add_user() {
         people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
-        socket.emit("update", "Hello, " + socket.handshake.session.userName + ". Please create or join a room.");
+        socket.emit("update", "Yoooo, " + socket.handshake.session.userName + ". Please create or join a room.");
         usersInLobby.push(socket.handshake.session.userName);
     }
     //if already signed in, send a login success

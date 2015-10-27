@@ -25,6 +25,10 @@ exports.Player.prototype.stand = function()
 exports.Player.prototype.hit = function()
 {
   this.hand.push( this.game.deck.getCard() );
+  if(this.player.getHandValue() >= 21)
+  {
+    this.player.stand();
+  }
 };
 
 exports.Player.prototype.split = function()

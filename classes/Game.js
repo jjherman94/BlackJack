@@ -15,8 +15,11 @@ exports.Game.prototype = {};
 
 exports.Game.prototype.startRound = function()
 {
-  this.dealer.dealCards();
-  this.currentPlayerIndex = 0;
+  if(this.players.lenght > 0)
+  {
+    this.dealer.dealCards();
+    this.currentPlayerIndex = 0;
+  }
 };
 
 exports.Game.prototype.nextPlayer = function()
@@ -48,7 +51,8 @@ exports.Game.prototype.awardWinners = function()
       player.chips -= player.bet;
     }
   } );
-  this.deck = new Deck();
+  this.deck = new deck_.Deck();
+  this.startRound();
 };
 
 /*
