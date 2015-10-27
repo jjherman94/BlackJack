@@ -1,18 +1,27 @@
+var deck = require('./Deck');
+var dealer = require('./Dealer');
+
 // Game class
-var Game = function()
+exports.Game = function()
 {
   this.numSeats = 5;
-  this.deck = new Deck();
-  this.players = [];
-  this.dealer = new Dealer();
+  this.deck = new deck.Deck();
+  this.players = Array();
+  this.dealer = new dealer.Dealer();
 };
 
-Game.prototype.cycleThroughPlayers = function()
+exports.Game.prototype = {};
+
+exports.Game.prototype.cycleThroughPlayers = function()
 {
 
 };
 
-Game.prototype.awardWinners = function()
+exports.Game.prototype.addPlayer = function(player) {
+    this.players.append(player);
+}
+
+exports.Game.prototype.awardWinners = function()
 {
   this.players.forEach( function( player )
   {
@@ -28,12 +37,9 @@ Game.prototype.awardWinners = function()
   this.deck = new Deck();
 };
 
-var getGame = function()
-{
-  return Game;
-};
-
-Game.prototype.getPlayer = function( seat )
+/*
+exports.Game.prototype.getPlayer = function( seat )
 {
   return Game.players[seat];
 };
+*/

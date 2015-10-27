@@ -1,35 +1,38 @@
 // Players class
-var Player = function( username, chips, seat )
+exports.Player = function( username, chips, id, game )
 {
   this.username = username;
   this.chips = chips;
-  this.seat = seat;
+  this.id = id;
   this.hand = [];
   this.bet = 0;
+  this.game = game;
 };
 
+exports.Player.prototype = {};
 
-Player.prototype.betChips = function( chipsBet )
+exports.Player.prototype.betChips = function( chipsBet )
 {
   if( chipsBet <= this.chips )
     this.bet = chipsBet;
 };
 
-Player.prototype.stand = function()
+exports.Player.prototype.stand = function()
 {
 
 };
 
-Player.prototype.hit = function()
+exports.Player.prototype.hit = function()
 {
-  this.hand.push( getGame().deck.getCard() );
+  this.hand.push( this.game.deck.getCard() );
 };
 
-Player.prototype.split = function()
+exports.Player.prototype.split = function()
 {
   // Do we want this functionality?
 };
 
+/*
 Player.prototype.login = function()
 {
 
@@ -39,8 +42,9 @@ Player.prototype.logout = function()
 {
 
 };
+*/
 
-Player.prototype.getHandValue = function()
+exports.Player.prototype.getHandValue = function()
 {
   var val = 0;
   var numAces = 0;

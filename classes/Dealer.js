@@ -1,14 +1,22 @@
 // Dealer Class
-var Dealer = new Player();
-Dealer.prototype.constructor = function()
+var player = require('./Player');
+var card = require('./Card');
+
+//needs to be defined
+exports.Dealer = function(){}
+
+// Inheritance
+exports.Dealer.prototype = Object.create(player.Player.prototype);
+
+exports.Dealer.prototype.constructor = function()
 {
-  this.hiddenCard = new Card();
+  this.hiddenCard = new card.Card();
   this.visibleHand = [];
 };
 
 var standValue = 17;
 
-Dealer.prototype.dealCards = function()
+exports.Dealer.prototype.dealCards = function()
 {
   getGame().players.forEach( function( player )
   {
@@ -22,7 +30,7 @@ Dealer.prototype.dealCards = function()
   this.visibleHand.push( getGame().deck.getCard() );
 };
 
-Dealer.prototype.takeTurn = function()
+exports.Dealer.prototype.takeTurn = function()
 {
   while( this.getHandValue() < standValue )
   {
@@ -30,7 +38,7 @@ Dealer.prototype.takeTurn = function()
   }
 };
 
-Dealer.prototype.getHandValue = function()
+exports.Dealer.prototype.getHandValue = function()
 {
   var val = 0;
   var numAces = 0;

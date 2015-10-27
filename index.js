@@ -9,6 +9,7 @@ var sanitizer = require('sanitizer');
 var session = require('express-session');
 var genuuid = require('uuid');
 var ios = require('socket.io-express-session');
+var blackJack = require('./blackjack');
 
 var HTTPS_PORT = 3300;
 var HTTP_PORT = 3000;
@@ -38,6 +39,8 @@ httpsServer.listen(HTTPS_PORT, function(){
 var Room = function(name, owner) {
     this.name = name;
     this.owner = owner;
+    this.people_in = 1;
+    this.game = blackJack.createGame();
 };
 
 var mySession = session({secret: 'glarble marble barble',
@@ -93,6 +96,17 @@ io.on('connection', function(socket) {
         console.log(getTime() + "sending rooms to " + people[socket.id].name);
     });
     
+    //leave room function; leave room when disconnecting
+    function leaveRoom(room, user) {
+        user.room = null;
+        socket.leave(room.name);
+        room.people_in--;
+        //destroy the room if empty
+        if(room.people_in === 0) {
+            delete rooms[room.name];
+        }
+    }
+    
     socket.on("createRoom", function(name) {
         if( !rooms[name] ) {
             var room = new Room(name, socket.id);
@@ -100,9 +114,18 @@ io.on('connection', function(socket) {
             
             rooms[name] = room;
             socket.join(name);
-            user.room = name;
-            socket.emit("update", "You created: " + user.room);
-            console.log(getTime() + user.name + " created room " + user.room);
+            socket.emit("update", "You created and joined: " + name);
+            console.log(getTime() + user.name + " created: " + name);
+            //leave old room if needed
+            var oldRoom = user.room;
+            //make sure the user doesn't recieve the leaving message
+            user.room = null;
+            if(oldRoom) {
+                leaveRoom(oldRoom, user);
+            }
+            //now re-assign the room
+            user.room = room;
+            socket.join(room.name);
         } else {
             socket.emit("update", "That room name is already taken.");
         }
@@ -111,25 +134,35 @@ io.on('connection', function(socket) {
     socket.on("joinRoom", function(name) {
       var user = people[socket.id];
       if(user && rooms[name]) {
-        user.room = name;
-        socket.join(name);
-        io.to(user.room).emit("update", user.name + " has joined: " + user.room);        
+          //leave the old room if present
+          if(user.room) {
+              //ignore requests to join rooms that they are already in
+              if(user.room.name === name) {
+                  return;
+              }
+              leaveRoom(user.room, user);
+          }
+          user.room = rooms[name];
+          user.room.people_in++;
+          socket.join(name);
+          io.to(user.room.name).emit("update", user.name + " has joined: " + user.room.name);        
+      } else {
+          socket.emit("update", "That room name does not exist.");
       }
     });
     
     socket.on("leaveRoom", function(name) {
-      var user = people[socket.id];
-      if(user && user.room) {
-          user.room = null;
-          socket.leave(name);
-          io.to(name).emit(user.name + "has left.");
-      }
+        var user = people[socket.id];
+        if(user && user.room) {
+            leaveRoom(user.room, user);
+            io.to(name).emit(user.name + " has left.");
+        }
     });
     
     socket.on('chat message', function(msg){
         var user = people[socket.id];
         if( user && user.room ) {
-          io.to(user.room).emit('chat message', user.name + ': ' + msg);
+          io.to(user.room.name).emit('chat message', user.name + ': ' + msg);
         }
     });
     
@@ -139,7 +172,8 @@ io.on('connection', function(socket) {
             //delete the list of users in the lobby
             usersInLobby.splice(usersInLobby.indexOf(user.name), 1);
             if(user.room) {
-                io.to(user.room).emit('chat message', user.name + ' disconnected.');
+                io.to(user.room.name).emit('chat message', user.name + ' disconnected.');
+                leaveRoom(user.room, user);
             }
             console.log(getTime() + user.name + ' disconnected.');
             delete people[socket.id];
@@ -174,6 +208,19 @@ io.on('connection', function(socket) {
                 socket.emit("loginBad");
             }
         });
+    });
+    
+    socket.on('hit', function(data) {
+        //only do something if the person is in a room
+        if(people[socket.id].room && people[socket.id].game) {
+            ;
+        }
+    });
+    
+    socket.on('stay', function(data) {
+        if(people[socket.id].room && people[socket.id].game) {
+            ;
+        }
     });
     
     socket.on('create', function(data) {

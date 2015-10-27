@@ -115,3 +115,11 @@ send_login = send_login_;
 send_create = send_create_;
 
 });
+
+function send_hit() {
+    socket.emit("hit");
+}
+
+function send_stay() {
+    socket.emit("stay");
+}
