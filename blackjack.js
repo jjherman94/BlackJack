@@ -8,6 +8,6 @@ exports.createGame = function() {
     return new game_.Game();
 }
 
-exports.addPlayer = function(username, chips, id, game) {
-    game.addPlayer(player_.Player(username, chips, id, game));
+exports.createPlayer = function(username, chips) {
+    return new player_.Player(username, chips);
 }

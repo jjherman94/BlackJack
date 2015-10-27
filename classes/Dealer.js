@@ -2,39 +2,34 @@
 var player = require('./Player');
 var card = require('./Card');
 
-//needs to be defined
-exports.Dealer = function(){}
-
-// Inheritance
-exports.Dealer.prototype = Object.create(player.Player.prototype);
-
-exports.Dealer.prototype.constructor = function()
+exports.Dealer = function(game)
 {
   this.hiddenCard = new card.Card();
   this.visibleHand = [];
+  this.game = game;
 };
-
-var standValue = 17;
 
 exports.Dealer.prototype.dealCards = function()
 {
-  getGame().players.forEach( function( player )
+  var game = this.game;
+  game.players.forEach( function( player )
   {
-    player.hand.push( getGame().deck.getCard() );
+    player.hand.push( game.deck.getCard() );
   } );
-  this.hiddenCard = getGame().deck.getCard();
-  getGame().players.forEach( function( player )
+  this.hiddenCard = game.deck.getCard();
+  this.game.players.forEach( function( player )
   {
-    player.hand.push( getGame().deck.getCard() );
+    player.hand.push( game.deck.getCard() );
   } );  
-  this.visibleHand.push( getGame().deck.getCard() );
+  this.visibleHand.push( game.deck.getCard() );
 };
 
 exports.Dealer.prototype.takeTurn = function()
 {
+  var standValue = 17;
   while( this.getHandValue() < standValue )
   {
-    this.visibleHand.push( getGame().deck.getCard() );
+    this.visibleHand.push( this.game.deck.getCard() );
   }
 };
 

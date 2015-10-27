@@ -80,7 +80,9 @@ io.use(ios(mySession, {autoSave:true}));
 
 io.on('connection', function(socket) {
     function add_user() {
-        people[socket.id] = {"name": socket.handshake.session.userName, "room": null};
+        var toAdd = blackJack.createPlayer(socket.handshake.session.userName,
+                                           socket.handshake.session.chips);
+        people[socket.id] = toAdd;
         socket.emit("update", "Yoooo, " + socket.handshake.session.userName + ". Please create or join a room.");
         usersInLobby.push(socket.handshake.session.userName);
     }
@@ -100,6 +102,8 @@ io.on('connection', function(socket) {
     function leaveRoom(room, user) {
         user.room = null;
         socket.leave(room.name);
+        //need to tell the game that the player left
+        room.game.removePlayer(user);
         room.people_in--;
         //destroy the room if empty
         if(room.people_in === 0) {
@@ -126,6 +130,8 @@ io.on('connection', function(socket) {
             //now re-assign the room
             user.room = room;
             socket.join(room.name);
+            //make the user join the game now
+            room.game.addPlayer(user);
         } else {
             socket.emit("update", "That room name is already taken.");
         }
@@ -146,6 +152,8 @@ io.on('connection', function(socket) {
           user.room.people_in++;
           socket.join(name);
           io.to(user.room.name).emit("update", user.name + " has joined: " + user.room.name);        
+          //make the user join the game now
+          room.game.addPlayer(user);
       } else {
           socket.emit("update", "That room name does not exist.");
       }
@@ -196,6 +204,8 @@ io.on('connection', function(socket) {
                         console.log(getTime() + "User " + clean_user + " logged on");
                         socket.handshake.session.userName = clean_user;
                         socket.handshake.session.uid = genuuid();
+                        //TODO: Actually load chip amount
+                        socket.handshake.session.chips = 500;
                         add_user();
                         socket.emit("loginGood");
                     } else {
@@ -210,18 +220,34 @@ io.on('connection', function(socket) {
         });
     });
     
-    socket.on('hit', function(data) {
+    socket.on('hit', function() {
+        var user = people[socket.id];
         //only do something if the person is in a room
-        if(people[socket.id].room && people[socket.id].game) {
-            ;
+        if(user.room && user.game) {
+            if(user.game.currentPlayer() === user) {
+                user.hit();
+            }
         }
     });
     
-    socket.on('stay', function(data) {
-        if(people[socket.id].room && people[socket.id].game) {
-            ;
+    socket.on('stand', function() {
+        var user = people[socket.id];
+        if(user.room && user.game) {
+            if(user.game.currentPlayer() === user) {
+                user.stand();
+            }
         }
     });
+    
+    socket.on('createGame', function() {
+        var user = people[socket.id];
+        if(user.room && user.room.owner === socket.id) {
+            if(user.room.game.startRound()) {
+                console.log(getTime() + "Game started in room " + user.room.name);
+            }
+        }
+    });
+        
     
     socket.on('create', function(data) {
         //make sure the creation is okay
@@ -242,6 +268,8 @@ io.on('connection', function(socket) {
                     console.log(getTime() + "Added user " + clean_user);
                     socket.handshake.session.userName = clean_user;
                     socket.handshake.session.uid = genuuid();
+                    //default of 500 chips
+                    socket.handshake.session.chips = 500;
                     add_user();
                     socket.emit("loginGood");
                 });

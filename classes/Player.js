@@ -1,15 +1,12 @@
 // Players class
-exports.Player = function( username, chips, id, game )
+exports.Player = function( username, chips )
 {
-  this.username = username;
+  this.name = username;
   this.chips = chips;
-  this.id = id;
-  this.hand = [];
+  this.hand = Array();
   this.bet = 0;
-  this.game = game;
+  this.game = null;
 };
-
-exports.Player.prototype = {};
 
 exports.Player.prototype.betChips = function( chipsBet )
 {
@@ -25,9 +22,9 @@ exports.Player.prototype.stand = function()
 exports.Player.prototype.hit = function()
 {
   this.hand.push( this.game.deck.getCard() );
-  if(this.player.getHandValue() >= 21)
+  if(this.getHandValue() >= 21)
   {
-    this.player.stand();
+    this.stand();
   }
 };
 

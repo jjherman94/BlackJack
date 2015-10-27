@@ -110,16 +110,23 @@ function send_create_() {
     socket.emit("create", {"username":username, "password":password});
 }
 
-//make a global version of send_login and send_create (by excluding var)
-send_login = send_login_;
-send_create = send_create_;
-
-});
-
-function send_hit() {
+function send_hit_() {
     socket.emit("hit");
 }
 
-function send_stay() {
-    socket.emit("stay");
+function send_stay_() {
+    socket.emit("stand");
 }
+
+function send_create_game_() {
+    socket.emit("createGame");
+}
+
+//make a global versions (by excluding var)
+send_login = send_login_;
+send_create = send_create_;
+send_hit = send_hit_;
+send_stay = send_stay_;
+send_create_game = send_create_game_;
+
+});
