@@ -19,12 +19,16 @@ exports.Player.prototype.betChips = function( chipsBet )
 
 exports.Player.prototype.stand = function()
 {
-
+  this.game.nextPlayer();
 };
 
 exports.Player.prototype.hit = function()
 {
   this.hand.push( this.game.deck.getCard() );
+  if(this.player.getHandValue() >= 21)
+  {
+    this.player.stand();
+  }
 };
 
 exports.Player.prototype.split = function()
@@ -33,16 +37,16 @@ exports.Player.prototype.split = function()
 };
 
 /*
-Player.prototype.login = function()
-{
+ Player.prototype.login = function()
+ {
 
-};
+ };
 
-Player.prototype.logout = function()
-{
+ Player.prototype.logout = function()
+ {
 
-};
-*/
+ };
+ */
 
 exports.Player.prototype.getHandValue = function()
 {
