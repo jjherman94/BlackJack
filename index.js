@@ -79,13 +79,25 @@ var rooms = {};
 io.use(ios(mySession, {autoSave:true}));
 
 io.on('connection', function(socket) {
+    function sendRooms() {
+        //extract out the names to fix a crash
+        var tempRooms = Array();
+        for(var key in rooms){
+          tempRooms.push(rooms[key].name);
+        }
+        socket.emit("roomList", tempRooms );
+        console.log(getTime() + "sending rooms to " + people[socket.id].name);
+    }
     function add_user() {
         var toAdd = blackJack.createPlayer(socket.handshake.session.userName,
                                            socket.handshake.session.chips);
         people[socket.id] = toAdd;
-        socket.emit("roomList", rooms );
+        sendRooms();
         socket.emit("update", "Yoooo, " + socket.handshake.session.userName + ". Please create or join a room.");
         usersInLobby.push(socket.handshake.session.userName);
+    }
+    function sendGameState(room) {
+        io.to(room.name).emit('hands', room.game.getStatus());
     }
     //if already signed in, send a login success
     if(socket.handshake.session.userName) {
@@ -95,13 +107,7 @@ io.on('connection', function(socket) {
     
     socket.on("getRooms", function() {
         //socket.emit("update", socket.handshake.session.userName);
-        var tempRooms = Array();
-        //extract out the names to fix a crash
-        for(var key in rooms){
-          tempRooms.push(rooms[key].name);
-        }
-        socket.emit("roomList", tempRooms );
-        console.log(getTime() + "sending rooms to " + people[socket.id].name);
+        sendRooms();
     });
     
     //leave room function; leave room when disconnecting
@@ -142,6 +148,7 @@ io.on('connection', function(socket) {
             socket.join(room.name);
             //make the user join the game now
             room.game.addPlayer(user);
+            sendGameState(room);
         } else {
             socket.emit("update", "That room name is already taken.");
         }
@@ -164,7 +171,8 @@ io.on('connection', function(socket) {
           socket.join(name);
           io.to(user.room.name).emit("update", user.name + " has joined: " + user.room.name);        
           //make the user join the game now
-          room.game.addPlayer(user);
+          user.room.game.addPlayer(user);
+          sendGameState(user.room);
       } else {
           socket.emit("update", "That room name does not exist.");
       }
@@ -237,8 +245,7 @@ io.on('connection', function(socket) {
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
                 user.hit();
-                io.to(user.room.name).emit('hands', user.game.getStatus());
-
+                sendGameState(user.room);
             }
         }
     });
@@ -248,7 +255,7 @@ io.on('connection', function(socket) {
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
                 user.stand();
-                io.to(user.room.name).emit('hands', user.room.game.getStatus());
+                sendGameState(user.room);
             }
         }
     });
@@ -271,8 +278,8 @@ io.on('connection', function(socket) {
             var readyToStart = user.betChips(amount);
             if(readyToStart) {
                 user.room.game.startRound();
-                io.to(user.room.name).emit('hands',user.room.game.getStatus());
             }
+            sendGameState(user.room);
         }
     });
         

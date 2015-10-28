@@ -21,10 +21,20 @@ exports.Game.prototype.getStatus = function()
 {
   toReturn = {};
   toReturn.players = [];
+  // If the game hasn't started yet mark it as special and send the info
+  if(!this.started)
+  {
+    toReturn.betInfo = true;
+  }
+  // If no rounds have been played the deck only bet waiting matters, mark it as such
+  if(!this.deck)
+  {
+    toReturn.isFirst = true;
+  }
   for(playerIndex in this.players)
   {
     var player = this.players[playerIndex];
-    toReturn.players.push({name:player.name, hand:player.hand});
+    toReturn.players.push({name:player.name, hand:player.hand, bet:player.bet});
   }
   toReturn.dealer = {hand: this.dealer.visibleHand};
   if(this.currentPlayer())

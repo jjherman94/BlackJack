@@ -68,37 +68,51 @@ socket.on('chat message', function(msg){
 
 socket.on('hands', function(gameStatus){
   $('#blackjackBoard').empty();
-  // Start with dealer
-  var msg = "Dealer has: ";
-  // Show the hidden card if known, ? otherwise
-  if(gameStatus.dealer.hiddenCard) {
-      msg += gameStatus.dealer.hiddenCard.rank;
-  } else {
-      msg += "?";
-  }
-  for(var cardIndex in gameStatus.dealer.hand) {
-    msg += " " + gameStatus.dealer.hand[cardIndex].rank;
-  }
-  $('#blackjackBoard').append($('<li>').text( msg ));
-  for(var playerIndex in gameStatus.players) {
+  if(gameStatus.betInfo) {
+    for(var playerIndex in gameStatus.players) {
       var player = gameStatus.players[playerIndex];
-      var msg = player.name + ":";
-      for(var cardIndex in player.hand) {
-          msg += "  " + player.hand[cardIndex].rank;
+      if(player.bet > 0) {
+        var msg = "Player " + player.name + " has bet " + player.bet;
+      } else {
+        var msg = "Waiting for player " + player.name + " to bet.";
       }
       $('#blackjackBoard').append($('<li>').text( msg ));
+    }
+    $('#blackjackBoard').append($('<li>').text( '' ));
   }
-  if(gameStatus.currentName) {
-      var msg = "Current turn: " + gameStatus.currentName;
-      $('#blackjackBoard').append($('<li>').text( msg ));
-  }
-  // Display winners if they're there (if player 0 has them; everyone does)
-  if(Math.abs(gameStatus.players[0].winnings) >= 0) {
-      for(var playerIndex in gameStatus.players) {
-          var player = gameStatus.players[playerIndex];
-          var msg = "Player " + player.name + " won " + player.winnings;
-          $('#blackjackBoard').append($('<li>').text( msg ));
-      }
+  if(!gameStatus.isFirst) {
+    // Start with dealer
+    var msg = "Dealer has: ";
+    // Show the hidden card if known, ? otherwise
+    if(gameStatus.dealer.hiddenCard) {
+        msg += gameStatus.dealer.hiddenCard.rank;
+    } else {
+        msg += "?";
+    }
+    for(var cardIndex in gameStatus.dealer.hand) {
+      msg += " " + gameStatus.dealer.hand[cardIndex].rank;
+    }
+    $('#blackjackBoard').append($('<li>').text( msg ));
+    for(var playerIndex in gameStatus.players) {
+        var player = gameStatus.players[playerIndex];
+        var msg = player.name + ":";
+        for(var cardIndex in player.hand) {
+            msg += "  " + player.hand[cardIndex].rank;
+        }
+        $('#blackjackBoard').append($('<li>').text( msg ));
+    }
+    if(gameStatus.currentName) {
+        var msg = "Current turn: " + gameStatus.currentName;
+        $('#blackjackBoard').append($('<li>').text( msg ));
+    }
+    // Display winners if they're there (if player 0 has them; everyone does)
+    if(Math.abs(gameStatus.players[0].winnings) >= 0) {
+        for(var playerIndex in gameStatus.players) {
+            var player = gameStatus.players[playerIndex];
+            var msg = "Player " + player.name + " won " + player.winnings;
+            $('#blackjackBoard').append($('<li>').text( msg ));
+        }
+    }
   }
 });
 
