@@ -234,6 +234,8 @@ io.on('connection', function(socket) {
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
                 user.hit();
+                io.to(user.room.name).emit('hands', user.game.gameStatus);
+
             }
         }
     });
@@ -252,6 +254,7 @@ io.on('connection', function(socket) {
         if(user.room && user.room.owner === socket.id) {
             if(user.room.game.startRound()) {
                 console.log(getTime() + "Game started in room " + user.room.name);
+                io.to(user.room.name).emit('hands',user.room.game.gameStatus);
             }
         }
     });

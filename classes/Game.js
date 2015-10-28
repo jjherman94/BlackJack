@@ -11,6 +11,7 @@ exports.Game = function()
   this.currentPlayerIndex = null;
   this.started = false;
   this.playerQueue = Array();
+  this.gameStatus = Array();
 };
 
 exports.Game.prototype = {};
@@ -29,7 +30,6 @@ exports.Game.prototype.startRound = function()
 
 exports.Game.prototype.nextPlayer = function()
 {
-  this.dealer.dealCards();
   this.currentPlayerIndex++;
   if( this.currentPlayerIndex === this.players.length )
   {

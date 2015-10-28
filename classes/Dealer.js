@@ -14,6 +14,7 @@ exports.Dealer.prototype.dealCards = function()
   var game = this.game;
   game.players.forEach( function( player )
   {
+    player.hand = Array();
     player.hand.push( game.deck.getCard() );
   } );
   this.hiddenCard = game.deck.getCard();
