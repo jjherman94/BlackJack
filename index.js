@@ -118,13 +118,15 @@ io.on('connection', function(socket) {
         room.game.removePlayer(user);
         socket.emit("update", "You left: "+room.name);
         room.people_in--;
+        io.to(room.name).emit(user.name + " has left.");
         //destroy the room if empty
         if(room.people_in === 0) {
             delete rooms[room.name];
         }
     }
     
-    socket.on("createRoom", function(name) {
+    socket.on("createRoom", function(roomName) {
+        var name = roomName.trim();
         // Don't allow empty names
         if(!name) {
             socket.emit("update", "Must name rooms!");
@@ -182,7 +184,6 @@ io.on('connection', function(socket) {
         var user = people[socket.id];
         if(user && user.room) {
             leaveRoom(user.room, user);
-            io.to(name).emit(user.name + " has left.");
         }
     });
     
@@ -286,7 +287,7 @@ io.on('connection', function(socket) {
     
     socket.on('create', function(data) {
         //make sure the creation is okay
-        var clean_user = sanitizer.sanitize(data.username);
+        var clean_user = sanitizer.sanitize(data.username.trim());
         if(clean_user == "") {
             socket.emit("createBad", {'reason': 'Empty user names are not allowed.'});
         }
