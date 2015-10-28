@@ -56,13 +56,28 @@ socket.on("roomList", function(rooms) {
     $("#rooms").empty();
     for(var room in rooms) {
       console.log(rooms[room]);
-      $("#rooms").append( new roomLink(rooms[room]) );
+      $("#rooms").append( new roomLink(rooms[room].name) );
     }
 }); 
 
 socket.on('chat message', function(msg){
     $('#messages').append($('<li>').text(getTime() + msg));
     $('#messages').scrollTop( $("#messages")[0].scrollHeight );
+});
+
+
+socket.on('hands', function(gameStatus){
+  $('#blackjackBoard').empty();
+  var msg = "";
+  for(var player in gameStatus)
+  {
+    msg = player["username"];
+    for(var card in player["hand"])
+    {
+      msg = msg+"  "+card.rank;
+    }
+    $('#blackjackBoard').append($('<li>').text( msg ));
+  }
 });
 
 socket.on('update', function(msg) {
