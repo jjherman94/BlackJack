@@ -56,7 +56,7 @@ socket.on("roomList", function(rooms) {
     $("#rooms").empty();
     for(var room in rooms) {
       console.log(rooms[room]);
-      $("#rooms").append( new roomLink(rooms[room].name) );
+      $("#rooms").append( new roomLink(rooms[room]) );
     }
 }); 
 
@@ -68,15 +68,37 @@ socket.on('chat message', function(msg){
 
 socket.on('hands', function(gameStatus){
   $('#blackjackBoard').empty();
-  var msg = "";
-  for(var player in gameStatus)
-  {
-    msg = player["username"];
-    for(var card in player["hand"])
-    {
-      msg = msg+"  "+card.rank;
-    }
-    $('#blackjackBoard').append($('<li>').text( msg ));
+  // Start with dealer
+  var msg = "Dealer has: ";
+  // Show the hidden card if known, ? otherwise
+  if(gameStatus.dealer.hiddenCard) {
+      msg += gameStatus.dealer.hiddenCard.rank;
+  } else {
+      msg += "?";
+  }
+  for(var cardIndex in gameStatus.dealer.hand) {
+    msg += " " + gameStatus.dealer.hand[cardIndex].rank;
+  }
+  $('#blackjackBoard').append($('<li>').text( msg ));
+  for(var playerIndex in gameStatus.players) {
+      var player = gameStatus.players[playerIndex];
+      var msg = player.name + ":";
+      for(var cardIndex in player.hand) {
+          msg += "  " + player.hand[cardIndex].rank;
+      }
+      $('#blackjackBoard').append($('<li>').text( msg ));
+  }
+  if(gameStatus.currentName) {
+      var msg = "Current turn: " + gameStatus.currentName;
+      $('#blackjackBoard').append($('<li>').text( msg ));
+  }
+  // Display winners if they're there (if player 0 has them; everyone does)
+  if(Math.abs(gameStatus.players[0].winnings) >= 0) {
+      for(var playerIndex in gameStatus.players) {
+          var player = gameStatus.players[playerIndex];
+          var msg = "Player " + player.name + " won " + player.winnings;
+          $('#blackjackBoard').append($('<li>').text( msg ));
+      }
   }
 });
 
@@ -133,8 +155,14 @@ function send_stay_() {
     socket.emit("stand");
 }
 
+/*
 function send_create_game_() {
     socket.emit("createGame");
+}
+*/
+
+function bet_(betAmount) {
+    socket.emit("bet", betAmount);
 }
 
 //make a global versions (by excluding var)
@@ -142,6 +170,7 @@ send_login = send_login_;
 send_create = send_create_;
 send_hit = send_hit_;
 send_stay = send_stay_;
-send_create_game = send_create_game_;
+//send_create_game = send_create_game_;
+bet = bet_;
 
 });

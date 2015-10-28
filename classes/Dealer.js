@@ -4,7 +4,7 @@ var card = require('./Card');
 
 exports.Dealer = function(game)
 {
-  this.hiddenCard = new card.Card();
+  this.hiddenCard = null;
   this.visibleHand = [];
   this.game = game;
 };
@@ -12,6 +12,7 @@ exports.Dealer = function(game)
 exports.Dealer.prototype.dealCards = function()
 {
   var game = this.game;
+  this.visibleHand = [];
   game.players.forEach( function( player )
   {
     player.hand = Array();
@@ -28,9 +29,10 @@ exports.Dealer.prototype.dealCards = function()
 exports.Dealer.prototype.takeTurn = function()
 {
   var standValue = 17;
-  while( this.getHandValue() < standValue )
+  while( this.getHandValue() < standValue && this.getHandValue() != 0)
   {
-    this.visibleHand.push( this.game.deck.getCard() );
+    var temp = this.game.deck.getCard();
+    this.visibleHand.push( temp );
   }
 };
 
@@ -55,6 +57,10 @@ exports.Dealer.prototype.getHandValue = function()
   {
     val = val - 10;
     numAces--;
+  }
+  if(val > 21)
+  {
+    val = 0;
   }
   return val;
 };

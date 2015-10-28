@@ -119,7 +119,10 @@ io.on('connection', function(socket) {
     }
     
     socket.on("createRoom", function(name) {
-        if( !rooms[name] ) {
+        // Don't allow empty names
+        if(!name) {
+            socket.emit("update", "Must name rooms!");
+        } else if( !rooms[name] ) {
             var room = new Room(name, socket.id);
             var user = people[socket.id];
             
@@ -234,7 +237,7 @@ io.on('connection', function(socket) {
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
                 user.hit();
-                io.to(user.room.name).emit('hands', user.game.gameStatus);
+                io.to(user.room.name).emit('hands', user.game.getStatus());
 
             }
         }
@@ -245,16 +248,30 @@ io.on('connection', function(socket) {
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
                 user.stand();
+                io.to(user.room.name).emit('hands', user.room.game.getStatus());
             }
         }
     });
     
+    /*
     socket.on('createGame', function() {
         var user = people[socket.id];
         if(user.room && user.room.owner === socket.id) {
             if(user.room.game.startRound()) {
                 console.log(getTime() + "Game started in room " + user.room.name);
-                io.to(user.room.name).emit('hands',user.room.game.gameStatus);
+                io.to(user.room.name).emit('hands',user.room.game.getStatus());
+            }
+        }
+    });
+    */
+    
+    socket.on('bet', function(amount) {
+        var user = people[socket.id];
+        if(user.room && user.game) {
+            var readyToStart = user.betChips(amount);
+            if(readyToStart) {
+                user.room.game.startRound();
+                io.to(user.room.name).emit('hands',user.room.game.getStatus());
             }
         }
     });

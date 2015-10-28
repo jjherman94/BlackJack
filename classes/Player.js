@@ -6,12 +6,17 @@ exports.Player = function( username, chips )
   this.hand = Array();
   this.bet = 0;
   this.game = null;
+  this.winnings = 0;
 };
 
 exports.Player.prototype.betChips = function( chipsBet )
 {
   if( chipsBet <= this.chips )
+  {
     this.bet = chipsBet;
+    return this.game.checkReady();
+  }
+  return false;
 };
 
 exports.Player.prototype.stand = function()
@@ -21,8 +26,15 @@ exports.Player.prototype.stand = function()
 
 exports.Player.prototype.hit = function()
 {
+  // Not allowed to hit if already at a blackjack
+  if(this.getHandValue() == 21)
+  {
+    this.stand();
+    return;
+  }
   this.hand.push( this.game.deck.getCard() );
-  if(this.getHandValue() >= 21)
+  // If the value is zero that means they went over 21
+  if(this.getHandValue() === 0 || this.getHandValue() === 21)
   {
     this.stand();
   }
@@ -61,6 +73,10 @@ exports.Player.prototype.getHandValue = function()
   {
     val = val - 10;
     numAces--;
+  }
+  if(val > 21)
+  {
+    val = 0;
   }
   return val;
 };
