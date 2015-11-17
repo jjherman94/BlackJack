@@ -11,6 +11,7 @@
  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <script src="js/connect.js"></script>
+  <script src="js/drawing.js"></script>
 
 </head>
 <body>
@@ -110,13 +111,16 @@
         <div id="roomList">
         <ul id="rooms"></ul>
         </div>
+        
+        <!-- PLAYING FIELD -->
+        <canvas id="blackjackBoard" width="500" height="500" style="background:rgba(0,0,0,0);">
+        </canvas>
     </div> <!-- Container -->
     
   </div> <!-- Wrapper -->
+  
+  <img id="cards" src="img/Deck-72x100x16.gif" style="display:none;">
 
-  <div id="blackjackBoard">
-    Put blackjack actions in this div
-  </div>
   <div class="pull-right">
     <button onclick="window.bet(1)" class="btn btn-default">Bet</button>
     <button onclick="window.send_hit()" class="btn btn-default">Hit</button>

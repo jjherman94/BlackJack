@@ -67,6 +67,8 @@ socket.on('chat message', function(msg){
 
 
 socket.on('hands', function(gameStatus){
+  drawCards(gameStatus);
+  /*
   $('#blackjackBoard').empty();
   if(gameStatus.betInfo) {
     for(var playerIndex in gameStatus.players) {
@@ -114,6 +116,7 @@ socket.on('hands', function(gameStatus){
         }
     }
   }
+  */
 });
 
 socket.on('update', function(msg) {
@@ -129,6 +132,7 @@ socket.on('loginGood', function() {
     //  $('#loginModal').modal('hide');
     //but neither was working, so I did this, which works.
     document.getElementById('loginModal').style.visibility = 'hidden';
+    myUsername = document.getElementById('username').value;
 });
 
 socket.on('loginBad', function() {
