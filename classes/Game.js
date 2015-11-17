@@ -34,7 +34,7 @@ exports.Game.prototype.getStatus = function()
   for(playerIndex in this.players)
   {
     var player = this.players[playerIndex];
-    toReturn.players.push({name:player.name, hand:player.hand, bet:player.bet});
+    toReturn.players.push({name:player.name, hand:player.hand, bet:player.bet, chips:player.chips});
   }
   toReturn.dealer = {hand: this.dealer.visibleHand};
   if(this.currentPlayer())
@@ -48,7 +48,7 @@ exports.Game.prototype.getStatus = function()
     toReturn.dealer.hiddenCard = this.dealer.hiddenCard;
     for(var i = 0; i < this.players.length; i++) 
     {
-       toReturn.players[i].winnings = this.players[i].winnings;
+      toReturn.players[i].winnings = this.players[i].winnings;
     }
   }
   return toReturn;

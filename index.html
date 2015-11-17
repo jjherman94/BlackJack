@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
+	<title>Blackjack</title>
   <link href='https://fonts.googleapis.com/css?family=Varela+Round|Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="stylesheet" href="css/simple-sidebar.css">
@@ -122,7 +122,11 @@
   <img id="cards" src="img/Deck-72x100x16.gif" style="display:none;">
 
   <div class="pull-right">
-    <button onclick="window.bet(1)" class="btn btn-default">Bet</button>
+    <button onclick="window.bet(1)" class="btn btn-default">Bet 1</button>
+    <button onclick="window.bet(5)" class="btn btn-default">Bet 5</button>
+    <button onclick="window.bet(25)" class="btn btn-default">Bet 25</button>
+    <button onclick="window.bet(100)" class="btn btn-default">Bet 100</button>
+
     <button onclick="window.send_hit()" class="btn btn-default">Hit</button>
     <button onclick="window.send_stay()" class="btn btn-default">Stand</button>
     <!-- <button onclick="window.send_create_game()" class="btn btn-default">Start Game</button> -->

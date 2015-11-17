@@ -115,6 +115,11 @@ io.on('connection', function(socket) {
           return;
         }
         io.to(room.name).emit('hands', room.game.getStatus());
+        if(room.game.finished){
+        room.game.getStatus().players.forEach(function(player) {
+          console.log(getTime() + player.name + " chips: " + player.chips);
+        });
+      }
     }
     //if already signed in, send a login success
     if(socket.handshake.session.userName) {
@@ -262,7 +267,7 @@ io.on('connection', function(socket) {
                         console.log(getTime() + "User " + clean_user + " logged on");
                         socket.handshake.session.userName = clean_user;
                         socket.handshake.session.uid = genuuid();
-                        //TODO: Actually load chip amount
+                        // TODO: Actually load chip amount
                         socket.handshake.session.chips = 500;
                         add_user();
                         socket.emit("loginGood");

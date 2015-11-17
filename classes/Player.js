@@ -11,12 +11,12 @@ exports.Player = function( username, chips )
 
 exports.Player.prototype.betChips = function( chipsBet )
 {
-  if( chipsBet <= this.chips )
-  {
+//  if( chipsBet <= this.chips )
+//  {
     this.bet = chipsBet;
     return this.game.checkReady();
-  }
-  return false;
+//  }
+//  return false;
 };
 
 exports.Player.prototype.stand = function()
@@ -27,7 +27,7 @@ exports.Player.prototype.stand = function()
 exports.Player.prototype.hit = function()
 {
   // Not allowed to hit if already at a blackjack
-  if(this.getHandValue() == 21)
+  if(this.getHandValue() === 21)
   {
     this.stand();
     return;
