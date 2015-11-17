@@ -79,7 +79,21 @@ var rooms = {};
 io.use(ios(mySession, {autoSave:true}));
 
 io.on('connection', function(socket) {
+  
+    function checkConnected( ) {
+      if(!people[socket.id]){
+        console.log("Invalid user");
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  
     function sendRooms() {
+        if(!checkConnected()){
+          return;
+        }
         //extract out the names to fix a crash
         var tempRooms = Array();
         for(var key in rooms){
@@ -97,6 +111,9 @@ io.on('connection', function(socket) {
         usersInLobby.push(socket.handshake.session.userName);
     }
     function sendGameState(room) {
+        if(!checkConnected()) {
+          return;
+        }
         io.to(room.name).emit('hands', room.game.getStatus());
     }
     //if already signed in, send a login success
@@ -106,12 +123,18 @@ io.on('connection', function(socket) {
     }
     
     socket.on("getRooms", function() {
+        if(!checkConnected()) {
+          return;
+        }
         //socket.emit("update", socket.handshake.session.userName);
         sendRooms();
     });
     
     //leave room function; leave room when disconnecting
     function leaveRoom(room, user) {
+        if(!checkConnected()) {
+          return;
+        }
         user.room = null;
         socket.leave(room.name);
         //need to tell the game that the player left
@@ -126,6 +149,9 @@ io.on('connection', function(socket) {
     }
     
     socket.on("createRoom", function(roomName) {
+        if(!checkConnected()) {
+          return;
+        }
         var name = roomName.trim();
         // Don't allow empty names
         if(!name) {
@@ -157,6 +183,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on("joinRoom", function(name) {
+      if(!checkConnected()) {
+        return;
+      }
       var user = people[socket.id];
       if(user && rooms[name]) {
           //leave the old room if present
@@ -181,6 +210,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on("leaveRoom", function(name) {
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         if(user && user.room) {
             leaveRoom(user.room, user);
@@ -188,6 +220,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on('chat message', function(msg){
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         if( user && user.room ) {
           io.to(user.room.name).emit('chat message', user.name + ': ' + msg);
@@ -195,6 +230,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on('disconnect', function() {
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         if(user) {
             //delete the list of users in the lobby
@@ -241,6 +279,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on('hit', function() {
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         //only do something if the person is in a room
         if(user.room && user.game) {
@@ -252,6 +293,9 @@ io.on('connection', function(socket) {
     });
     
     socket.on('stand', function() {
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         if(user.room && user.game) {
             if(user.game.currentPlayer() === user) {
@@ -274,6 +318,9 @@ io.on('connection', function(socket) {
     */
     
     socket.on('bet', function(amount) {
+        if(!checkConnected()) {
+          return;
+        }
         var user = people[socket.id];
         if(user.room && user.game) {
             var readyToStart = user.betChips(amount);
