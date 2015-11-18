@@ -19,9 +19,12 @@ function drawCards(gameStatus) {
   ctx.clearRect(0, 0, c.width, c.height);
   //draw hidden card
   var hiddenOffsets = offsetByCard(gameStatus.dealer.hiddenCard);
-  ctx.drawImage(cards, hiddenOffsets.x, hiddenOffsets.y, 72, 100, 0, 0, 72, 100);
+  ctx.font = "30px Georgia";
+  ctx.fillStyle="#FFFFFF";
+  ctx.fillText("Dealer", 0, 30);
+  ctx.drawImage(cards, hiddenOffsets.x, hiddenOffsets.y, 72, 100, 0, 35, 72, 100);
   var x = 15;
-  var y = 0;
+  var y = 35;
   //draw card function
   function drawCard(card) {
     var offsets = offsetByCard(card);
@@ -31,7 +34,9 @@ function drawCards(gameStatus) {
   gameStatus.dealer.hand.forEach(drawCard);
   gameStatus.players.forEach(function(player) {
     x = 0;
-    y += 120;
+    y += 130;
+    ctx.fillText(player.name + "   " + player.chips, 0, y);
+    y += 5;
     player.hand.forEach(drawCard);
   });
 }   

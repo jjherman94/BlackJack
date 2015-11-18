@@ -96,6 +96,8 @@ exports.Game.prototype.nextPlayer = function()
 
 exports.Game.prototype.addPlayer = function( player )
 {
+  player.hand = Array();
+  player.bet = 0;
   player.game = this;
   if(!this.started) 
   {
@@ -138,7 +140,31 @@ exports.Game.prototype.awardWinners = function()
 
 exports.Game.prototype.removePlayer = function( player )
 {
-  //TODO: Program this
+  for(i = 0; i<this.players.length; i++)
+  {
+    if(this.players[i] === player)
+    {
+      this.players.splice(i,1);
+      if(i < this.currentPlayerIndex)
+      {
+        this.currentPlayerIndex--;
+      }
+      else if(i === this.currentPlayerIndex)
+      {
+        this.currentPlayerIndex--;
+        this.nextPlayer();
+      }
+      return;
+    }
+  }
+  for(i = 0; i<this.playerQueue.length; i++)
+  {
+    if(this.playerQueue[i] === player)
+    {
+      this.playerQueue.splice(i,1);
+      return;
+    }
+  }
 };
 
 exports.Game.prototype.currentPlayer = function()

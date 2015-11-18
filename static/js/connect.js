@@ -180,6 +180,8 @@ function send_create_game_() {
 */
 
 function bet_(betAmount) {
+    var audio1 = document.getElementById('sound1');
+    audio1.play();
     socket.emit("bet", betAmount);
 }
 

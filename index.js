@@ -115,12 +115,8 @@ io.on('connection', function(socket) {
           return;
         }
         io.to(room.name).emit('hands', room.game.getStatus());
-        if(room.game.finished){
-        room.game.getStatus().players.forEach(function(player) {
-          console.log(getTime() + player.name + " chips: " + player.chips);
-        });
-      }
     }
+    
     //if already signed in, send a login success
     if(socket.handshake.session.userName) {
         socket.emit("loginGood");
@@ -150,6 +146,9 @@ io.on('connection', function(socket) {
         //destroy the room if empty
         if(room.people_in === 0) {
             delete rooms[room.name];
+        }
+        else {
+          sendGameState(room);
         }
     }
     
