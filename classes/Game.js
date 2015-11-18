@@ -101,6 +101,7 @@ exports.Game.prototype.addPlayer = function( player )
   player.game = this;
   if(!this.started) 
   {
+    this.currentPlayerIndex++;
     this.players.push( player );
   } 
   else 
