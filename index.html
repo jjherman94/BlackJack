@@ -15,12 +15,14 @@
 
 </head>
 <body>
+  <audio id="sound2" src="jurass01.mp3" preload="auto"></audio>
 	<!--login modal-->
   <div id="loginModal" class="modal show" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
           <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="document.getElementById('sound2').play();">×</button>
+              <div id="embed"></div>
               <h1 class="text-center">Login, yo</h1>
           </div>
           <div class="modal-body">
