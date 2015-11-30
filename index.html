@@ -87,18 +87,46 @@
     </div>
   </div>
 
-  <div id="wrapper">
-    <div id="sidebar-wrapper">
-        <ul id="messages">
-        </ul>
-        <div id="input" style="padding:0;background-color:#eee;">
-            <form class="input-group" id="message">
-                <input class="form-control" id="m" autocomplete="off" placeholder="Enter message" />
-                <span class="input-group-btn"><button id="m-btn" class="btn btn-primary">Send</button></span>
-            </form>
-        </div>
-    </div> <!-- Sidebar -->
+  <nav>
+    <div id="wrapper">
+      <div id="sidebar-wrapper">
+          <ul id="messages">
+          </ul>
+          <div id="input" style="padding:0;background-color:#eee;">
+              <form class="input-group" id="message">
+                  <input class="form-control" id="m" autocomplete="off" placeholder="Enter message" />
+                  <span class="input-group-btn"><button id="m-btn" class="btn btn-primary">Send</button></span>
+              </form>
+          </div>
+      </div> <!-- Sidebar -->
+    </div>
+  </nav>
+
+  <section>
+    <!-- PLAYING FIELD -->
+    <canvas id="blackjackBoard" width="500" height="500" style="background:rgba(0,0,0,0);">
+    </canvas>
+    <img id="cards" src="img/Deck-72x100x16.gif" style="display:none;">
+    <audio id="sound1" src="PokerChips-Plastic.mp3"></audio>
     
+    <aside id="buttons">
+      <button onclick="window.send_hit()" class="btn btn-primary btn-lg gradient">Hit</button>
+      <button onclick="window.send_stay()" class="btn btn-primary btn-lg gradient">Stand</button>
+      <div class="dropdown" style="padding-top:10px">
+        <button class="btn btn-danger btn-lg gradient drop-toggle" type="button" data-toggle="dropdown">Place your bet
+          <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+          <li><a href="#" onclick="window.bet(1)">Bet $1</a></li>
+          <li><a href="#" onclick="window.bet(5)">Bet $5</a></li>
+          <li><a href="#" onclick="window.bet(25)">Bet $25</a></li>
+          <li><a href="#" onclick="window.bet(100)">Bet $100</a></li>
+        </ul>
+      </div>
+      <!-- <button onclick="window.send_create_game()" class="btn btn-default">Start Game</button> -->
+    </aside>  
+  </section>
+
+  <aside>
     <div id="page-content-wrapper">
         <!-- CREATE ROOM FORM -->
         <form class="form-inline" id="createRoom" >
@@ -111,25 +139,8 @@
         <div id="roomList">
         <ul id="rooms"></ul>
         </div>
-        
-        <!-- PLAYING FIELD -->
-        <canvas id="blackjackBoard" width="500" height="500" style="background:rgba(0,0,0,0);">
-        </canvas>
-    </div> <!-- Container -->
-    
-  </div> <!-- Wrapper -->
+    </div> <!-- Container -->  
+  </aside>
   
-  <img id="cards" src="img/Deck-72x100x16.gif" style="display:none;">
-  <audio id="sound1" src="PokerChips-Plastic.mp3"></audio>
-  <div class="pull-right">
-    <button onclick="window.bet(1)" class="btn btn-default">Bet 1</button>
-    <button onclick="window.bet(5)" class="btn btn-default">Bet 5</button>
-    <button onclick="window.bet(25)" class="btn btn-default">Bet 25</button>
-    <button onclick="window.bet(100)" class="btn btn-default">Bet 100</button>
-
-    <button onclick="window.send_hit()" class="btn btn-default">Hit</button>
-    <button onclick="window.send_stay()" class="btn btn-default">Stand</button>
-    <!-- <button onclick="window.send_create_game()" class="btn btn-default">Start Game</button> -->
-  </div>
 </body>
 </html>
