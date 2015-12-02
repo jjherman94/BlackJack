@@ -105,6 +105,7 @@ io.on('connection', function(socket) {
     function add_user() {
         var toAdd = blackJack.createPlayer(socket.handshake.session.userName,
                                            socket.handshake.session.chips);
+        toAdd.databaseName = socket.handshake.session.databaseName;
         people[socket.id] = toAdd;
         sendRooms();
         socket.emit("update", "Yoooo, " + socket.handshake.session.userName + ". Please create or join a room.");
@@ -245,7 +246,9 @@ io.on('connection', function(socket) {
                 io.to(user.room.name).emit('chat message', user.name + ' disconnected.');
                 leaveRoom(user.room, user);
             }
-            console.log(getTime() + user.name + ' disconnected.');
+            console.log(getTime() + user.name + ' disconnected [' + user.chips + ' chips]');
+            //update chip amounts
+            db.run("UPDATE users SET chips=" + user.chips + " WHERE username='" + user.databaseName + "'");
             delete people[socket.id];
         }
     });
@@ -257,17 +260,19 @@ io.on('connection', function(socket) {
         }
         //first try to find the user (there will only be one result)
         var clean_user = sanitizer.sanitize(data.username);
+        //remove '
+        clean_user = clean_user.replace(/'/g, "''");
         db.all("SELECT * FROM users WHERE username='" + clean_user + "'", function(err, rows){
             if(rows.length > 0) {
                 row = rows[0];
                 //now test the password
                 password(data.password).verifyAgainst(row.password, function(error, verified){
                     if(verified){
-                        console.log(getTime() + "User " + clean_user + " logged on");
-                        socket.handshake.session.userName = clean_user;
+                        console.log(getTime() + "User " + clean_user + " logged on [" + row.chips + " chips]");
+                        socket.handshake.session.userName = clean_user.replace(/''/g, "'");
+                        socket.handshake.session.databaseName = clean_user;
                         socket.handshake.session.uid = genuuid();
-                        // TODO: Actually load chip amount
-                        socket.handshake.session.chips = 500;
+                        socket.handshake.session.chips = row.chips;
                         add_user();
                         socket.emit("loginGood");
                     } else {
@@ -341,7 +346,10 @@ io.on('connection', function(socket) {
         var clean_user = sanitizer.sanitize(data.username.trim());
         if(clean_user == "") {
             socket.emit("createBad", {'reason': 'Empty user names are not allowed.'});
+            return;
         }
+        //Also get rid of '
+        clean_user = clean_user.replace(/'/g, "''");
         db.all('SELECT 1 FROM users WHERE username="' + clean_user + '"', function(err, rows) {
             if(rows.length > 0) {
                 console.log(getTime() + "User " + clean_user + " creation attempted again.");
@@ -351,7 +359,7 @@ io.on('connection', function(socket) {
                     var shasum = crypto.createHash('sha1');
                     shasum.update(data.password);
                     db.run("INSERT INTO users VALUES ('" + clean_user
-                            + "', '" + hash + "')");
+                            + "', '" + hash + "', '500')");
                     console.log(getTime() + "Added user " + clean_user);
                     socket.handshake.session.userName = clean_user;
                     socket.handshake.session.uid = genuuid();
