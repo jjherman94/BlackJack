@@ -185,7 +185,7 @@ function bet_(betAmount) {
     socket.emit("bet", betAmount);
 }
 
-//make a global versions (by excluding var)
+//make global versions (by excluding var)
 send_login = send_login_;
 send_create = send_create_;
 send_hit = send_hit_;
