@@ -73,6 +73,9 @@ app.use('/', express.static(__dirname + '/static'));
 
 var db = new sqlite3.Database('users.sql3');
 
+//ensure that no users are logged in when the server starts
+db.run("UPDATE users SET loggedin=0");
+
 var people = {};
 var rooms = {};
 
@@ -248,13 +251,13 @@ io.on('connection', function(socket) {
             }
             console.log(getTime() + user.name + ' disconnected [' + user.chips + ' chips]');
             //update chip amounts
-            db.run("UPDATE users SET chips=" + user.chips + " WHERE username='" + user.databaseName + "'");
+            db.run("UPDATE users SET chips=" + user.chips + ", loggedin=0 WHERE username='" + user.databaseName + "'");
             delete people[socket.id];
         }
     });
     
     socket.on('login', function(data) {
-        //don't allow people to login multiple times
+        //don't allow people to login multiple times (doesn't work?)
         if(socket.handshake.session.userName) {
             socket.emit("loginBad");
         }
@@ -268,6 +271,14 @@ io.on('connection', function(socket) {
                 //now test the password
                 password(data.password).verifyAgainst(row.password, function(error, verified){
                     if(verified){
+                        //make sure the user isn't already logged in
+                        if(row.loggedin) {
+                           socket.emit("loginBad");
+                           console.log(getTime() + "User " + clean_user + " attempted to log in twice.");
+                           return;
+                        }
+                        //mark user as logged in
+                        db.run("UPDATE users SET loggedin=1 WHERE username='" + clean_user + "'");
                         console.log(getTime() + "User " + clean_user + " logged on [" + row.chips + " chips]");
                         socket.handshake.session.userName = clean_user.replace(/''/g, "'");
                         socket.handshake.session.databaseName = clean_user;
@@ -359,7 +370,7 @@ io.on('connection', function(socket) {
                     var shasum = crypto.createHash('sha1');
                     shasum.update(data.password);
                     db.run("INSERT INTO users VALUES ('" + clean_user
-                            + "', '" + hash + "', '500')");
+                            + "', '" + hash + "', 500, 1)");
                     console.log(getTime() + "Added user " + clean_user);
                     socket.handshake.session.userName = clean_user;
                     socket.handshake.session.uid = genuuid();
