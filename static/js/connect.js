@@ -58,7 +58,7 @@ socket.on("roomList", function(rooms) {
       console.log(rooms[room]);
       $("#rooms").append( new roomLink(rooms[room]) );
     }
-}); 
+});
 
 socket.on('chat message', function(msg){
     $('#messages').append($('<li>').text(getTime() + msg));
@@ -138,11 +138,13 @@ socket.on('loginGood', function() {
 socket.on('loginBad', function() {
     //TODO: Make function make an error appear
     console.log("bad login");
+    alert("Error logging in.");
 });
 
 socket.on('createBad', function(data) {
-    //ToDO: Make function make an error appear
+    //TODO: Make function make an error appear
     console.log("Bad create: " + data.reason());
+    alert("Error creating account: " + data.reason());
 });
 
 function send_login_() {
@@ -160,6 +162,7 @@ function send_create_() {
     var password2 = document.getElementById('create_password2').value;
     if(password !== password2) {
        //TODO: Make a failure message about passwords not matching
+       alert("Passwords do not match");
        return;
     }
     socket.emit("create", {"username":username, "password":password});
