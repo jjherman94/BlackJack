@@ -40,6 +40,7 @@ var Room = function(name, owner) {
     this.name = name;
     this.owner = owner;
     this.people_in = 1;
+    this.max_people = 5;
     this.game = blackJack.createGame();
 };
 
@@ -195,7 +196,12 @@ io.on('connection', function(socket) {
         return;
       }
       var user = people[socket.id];
+      
       if(user && rooms[name]) {
+          if(rooms[name].people_in >= rooms[name].max_people) {
+              socket.emit("update", "Sorry, that room is full.");
+              return;
+          }
           //leave the old room if present
           if(user.room) {
               //ignore requests to join rooms that they are already in

@@ -160,6 +160,10 @@ function send_create_() {
     var username = document.getElementById('create_username').value;
     var password = document.getElementById('create_password').value;
     var password2 = document.getElementById('create_password2').value;
+    if( password.trim() === "" ) {
+        alert("You must enter a password!");
+        return;
+    }
     if(password !== password2) {
        //TODO: Make a failure message about passwords not matching
        alert("Passwords do not match");
