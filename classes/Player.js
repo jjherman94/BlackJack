@@ -13,7 +13,10 @@ exports.Player.prototype.betChips = function( chipsBet )
 {
 //  if( chipsBet <= this.chips )
 //  {
-    this.bet = chipsBet;
+    if(!this.game.started)
+    {
+      this.bet = chipsBet;
+    }
     return this.game.checkReady();
 //  }
 //  return false;
